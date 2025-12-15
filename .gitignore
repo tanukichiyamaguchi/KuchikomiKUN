@@ -1,0 +1,12 @@
+# 設定ファイル（APIキーを含む）
+config.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+.vscode/
+.idea/

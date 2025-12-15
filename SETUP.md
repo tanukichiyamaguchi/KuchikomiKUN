@@ -9,12 +9,15 @@
 
 ```
 KuchikomiKUN/
-├── index.html          # メインHTML
-├── style.css           # スタイルシート（金色コーポレートカラー）
-├── script.js           # JavaScript（フロントエンド処理）
-├── google-apps-script.js  # Google Apps Script（スプレッドシート連携）
-├── logo.png            # ロゴ画像（別途配置）
-└── SETUP.md            # このファイル
+├── index.html            # メインHTML
+├── style.css             # スタイルシート（金色コーポレートカラー）
+├── script.js             # JavaScript（フロントエンド処理）
+├── config.example.js     # 設定ファイルのテンプレート
+├── config.js             # 設定ファイル（自分で作成、.gitignoreで除外）
+├── google-apps-script.js # Google Apps Script（スプレッドシート連携）
+├── logo.png              # ロゴ画像（別途配置）
+├── .gitignore            # Git除外設定
+└── SETUP.md              # このファイル
 ```
 
 ## セットアップ手順
@@ -38,9 +41,12 @@ KuchikomiKUN/
    - アクセスできるユーザー: 全員
 8. 表示されたURLをコピー
 
-### 3. API設定（script.js）
+### 3. 設定ファイルの作成
 
-`script.js` ファイルの `CONFIG` セクションを編集:
+**重要: APIキーは`script.js`に直接書かないでください！GitHubにアップロードされてしまいます。**
+
+1. `config.example.js` を `config.js` という名前でコピー
+2. `config.js` を開いて設定を入力:
 
 ```javascript
 const CONFIG = {
@@ -50,9 +56,15 @@ const CONFIG = {
     // 手順2で取得したGoogle Apps Script URL
     SPREADSHEET_URL: 'https://script.google.com/macros/s/xxxxxx/exec',
 
-    // その他はそのままでOK
+    // 以下はそのままでOK
+    GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
+    SALON_NAME: 'KATEstageLASH 蒲田西口店',
+    MAX_CHARS: 500,
+    MIN_CHARS: 50
 };
 ```
+
+※ `config.js` は `.gitignore` で除外されているため、GitHubにはアップロードされません。
 
 #### OpenAI API Keyの取得方法
 

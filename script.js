@@ -1,29 +1,35 @@
 /**
  * KATEstageLASH Review System
  * 口コミ投稿システム JavaScript
+ *
+ * 注意: APIキーなどの設定は config.js に記載してください
+ * config.example.js をコピーして config.js を作成し、設定を入力してください
  */
 
 // =====================================================
-// Configuration
+// Configuration (デフォルト値 - config.jsで上書き可能)
 // =====================================================
 
-const CONFIG = {
-    // OpenAI API Key (別途設定してください)
-    OPENAI_API_KEY: 'YOUR_OPENAI_API_KEY_HERE',
+// config.jsが読み込まれていない場合のデフォルト値
+if (typeof CONFIG === 'undefined') {
+    var CONFIG = {
+        // OpenAI API Key（config.jsで設定）
+        OPENAI_API_KEY: '',
 
-    // Google Apps Script Web App URL (スプレッドシート連携用)
-    SPREADSHEET_URL: 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE',
+        // Google Apps Script Web App URL（config.jsで設定）
+        SPREADSHEET_URL: '',
 
-    // Google Review URL
-    GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
+        // Google Review URL
+        GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
 
-    // Salon Info
-    SALON_NAME: 'KATEstageLASH 蒲田西口店',
+        // Salon Info
+        SALON_NAME: 'KATEstageLASH 蒲田西口店',
 
-    // Review Settings
-    MAX_CHARS: 500,
-    MIN_CHARS: 50
-};
+        // Review Settings
+        MAX_CHARS: 500,
+        MIN_CHARS: 50
+    };
+}
 
 // =====================================================
 // State Management
