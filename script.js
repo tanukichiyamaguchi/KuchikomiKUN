@@ -334,13 +334,8 @@ async function generateReview() {
     try {
         let review;
 
-        // Try API first
-        if (CONFIG.OPENAI_API_KEY && CONFIG.OPENAI_API_KEY !== 'YOUR_OPENAI_API_KEY_HERE') {
-            review = await generateReviewWithAPI();
-        } else {
-            // Use fallback templates
-            review = generateReviewFromTemplate();
-        }
+        // Try Netlify Function first (for AI generation)
+        review = await generateReviewWithNetlifyFunction();
 
         state.generatedReview = review;
         state.editedReview = review;
@@ -374,32 +369,15 @@ async function generateReview() {
     }
 }
 
-async function generateReviewWithAPI() {
-    const prompt = createReviewPrompt();
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+async function generateReviewWithNetlifyFunction() {
+    const response = await fetch('/.netlify/functions/generate-review', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}`
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
-            messages: [
-                {
-                    role: 'system',
-                    content: `あなたは美容サロンの口コミを作成するアシスタントです。
-                    お客様の満足度に基づいて、自然で具体的な口コミを生成してください。
-                    口コミは日本語で、100〜200文字程度で作成してください。
-                    絵文字は使用せず、丁寧な言葉遣いで書いてください。`
-                },
-                {
-                    role: 'user',
-                    content: prompt
-                }
-            ],
-            max_tokens: 300,
-            temperature: 0.8
+            menu: state.selectedMenu,
+            ratings: state.ratings
         })
     });
 
@@ -408,7 +386,12 @@ async function generateReviewWithAPI() {
     }
 
     const data = await response.json();
-    return data.choices[0].message.content.trim();
+
+    if (data.error) {
+        throw new Error(data.error);
+    }
+
+    return data.review;
 }
 
 function createReviewPrompt() {
