@@ -9,10 +9,10 @@
 
 const CONFIG = {
     // OpenAI API Key (別途設定してください)
-    OPENAI_API_KEY: 'YOUR_OPENAI_API_KEY_HERE',
+    OPENAI_API_KEY: '',
 
     // Google Apps Script Web App URL (スプレッドシート連携用)
-    SPREADSHEET_URL: 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE',
+    SPREADSHEET_URL: 'https://script.google.com/macros/s/AKfycbz6-q1ovAP1rfa7h4SIlVbel2n7KcpvxTisjyBdXS7f69sQfYfsK52sKM1fzEzVtznZgA/exec',
 
     // Google Review URL
     GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
