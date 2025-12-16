@@ -8,7 +8,7 @@
 window.CONFIG = {
     // Google Apps Script Web App URL
     // GASをデプロイ後、ここにURLを設定してください
-    GAS_URL: 'https://script.google.com/macros/s/AKfycbz6-q1ovAP1rfa7h4SIlVbel2n7KcpvxTisjyBdXS7f69sQfYfsK52sKM1fzEzVtznZgA/exec',
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbyy6V2CWSMaNI-v9sislST6OTRmX3dDWmfpzHkCxh4Y_uXm7SxEACblYpE3ErDPFW58mQ/exec',
 
     // Google Review URL
     GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
