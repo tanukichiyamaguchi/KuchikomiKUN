@@ -1,6 +1,6 @@
 /**
  * KATEstageLASH Review System
- * Google Apps Script for Spreadsheet Integration
+ * Google Apps Script for Spreadsheet Integration & AI Review Generation
  *
  * ============================================
  * セットアップ手順
@@ -9,14 +9,19 @@
  * 1. Google Spreadsheetを新規作成
  * 2. 「拡張機能」→「Apps Script」を開く
  * 3. このコードを全てコピーしてCode.gsに貼り付け
- * 4. 「デプロイ」→「新しいデプロイ」をクリック
- * 5. 「種類の選択」で「ウェブアプリ」を選択
- * 6. 設定：
+ * 4. OpenAI APIキーを設定:
+ *    - 左メニュー「プロジェクトの設定」→「スクリプト プロパティ」
+ *    - 「スクリプト プロパティを追加」をクリック
+ *    - プロパティ名: OPENAI_API_KEY
+ *    - 値: sk-xxxx（あなたのAPIキー）
+ * 5. 「デプロイ」→「新しいデプロイ」をクリック
+ * 6. 「種類の選択」で「ウェブアプリ」を選択
+ * 7. 設定：
  *    - 説明: KATEstageLASH Review System
  *    - 次のユーザーとして実行: 自分
  *    - アクセスできるユーザー: 全員
- * 7. 「デプロイ」をクリック
- * 8. 表示されたURLをコピーして、script.jsのSPREADSHEET_URLに設定
+ * 8. 「デプロイ」をクリック
+ * 9. 表示されたURLをコピーして、config.jsのGAS_URLに設定
  *
  * ============================================
  */
@@ -24,6 +29,7 @@
 // スプレッドシートの設定
 const SPREADSHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId();
 const SHEET_NAME = '口コミデータ';
+const SALON_NAME = 'KATEstageLASH 蒲田西口店';
 
 /**
  * 初回セットアップ - スプレッドシートにヘッダーを設定
@@ -56,7 +62,7 @@ function setupSheet() {
   headerRange.setValues([headers]);
 
   // ヘッダーのスタイル設定
-  headerRange.setBackground('#D4AF37');  // ゴールド
+  headerRange.setBackground('#C9A227');  // ゴールド
   headerRange.setFontColor('#FFFFFF');
   headerRange.setFontWeight('bold');
   headerRange.setHorizontalAlignment('center');
@@ -88,15 +94,26 @@ function doPost(e) {
     // リクエストデータをパース
     const data = JSON.parse(e.postData.contents);
 
-    // データを保存
-    const result = saveReviewData(data);
+    // アクションに応じて処理を分岐
+    const action = data.action || 'save';
+
+    let result;
+
+    switch (action) {
+      case 'generate':
+        // AI口コミ生成
+        result = generateReviewWithAI(data);
+        break;
+      case 'save':
+      default:
+        // データ保存
+        result = saveReviewData(data);
+        break;
+    }
 
     // 成功レスポンス
-    return ContentService.createTextOutput(JSON.stringify({
-      status: 'success',
-      message: 'データが保存されました',
-      rowNumber: result.rowNumber
-    })).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
     // エラーレスポンス
@@ -112,10 +129,175 @@ function doPost(e) {
  * GETリクエストを処理（テスト用）
  */
 function doGet(e) {
+  // CORSプリフライト対応
   return ContentService.createTextOutput(JSON.stringify({
     status: 'ok',
-    message: 'KATEstageLASH Review System API is running'
+    message: 'KATEstageLASH Review System API is running',
+    version: '2.0'
   })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * OpenAI APIを使用して口コミを生成
+ * @param {Object} data - 評価データ
+ * @returns {Object} - 生成結果
+ */
+function generateReviewWithAI(data) {
+  // スクリプトプロパティからAPIキーを取得
+  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
+
+  if (!apiKey) {
+    // APIキーが設定されていない場合はテンプレートを使用
+    return {
+      status: 'success',
+      review: generateReviewFromTemplate(data),
+      source: 'template'
+    };
+  }
+
+  try {
+    const prompt = createReviewPrompt(data);
+
+    const response = UrlFetchApp.fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      payload: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `あなたは美容サロンの口コミを作成するアシスタントです。
+お客様の満足度に基づいて、自然で具体的な口コミを生成してください。
+
+【ルール】
+- 日本語で100〜200文字程度
+- 絵文字は使用しない
+- 丁寧な言葉遣いで書く
+- 実際に体験したかのような具体的な表現を使う
+- サロン名は含めない
+- 評価に応じたトーンで書く（高評価は積極的に、低評価は控えめに）`
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 300,
+        temperature: 0.8
+      }),
+      muteHttpExceptions: true
+    });
+
+    const responseCode = response.getResponseCode();
+    const responseText = response.getContentText();
+
+    if (responseCode !== 200) {
+      Logger.log('OpenAI API Error: ' + responseText);
+      // エラー時はテンプレートにフォールバック
+      return {
+        status: 'success',
+        review: generateReviewFromTemplate(data),
+        source: 'template'
+      };
+    }
+
+    const result = JSON.parse(responseText);
+    const review = result.choices[0].message.content.trim();
+
+    return {
+      status: 'success',
+      review: review,
+      source: 'ai'
+    };
+
+  } catch (error) {
+    Logger.log('AI Generation Error: ' + error.toString());
+    // エラー時はテンプレートにフォールバック
+    return {
+      status: 'success',
+      review: generateReviewFromTemplate(data),
+      source: 'template'
+    };
+  }
+}
+
+/**
+ * AIプロンプトを作成
+ * @param {Object} data - 評価データ
+ * @returns {string} - プロンプト
+ */
+function createReviewPrompt(data) {
+  const { menu, overall, quality, service, atmosphere, value } = data;
+
+  let tone = '';
+  if (overall >= 5) {
+    tone = '大変満足した体験として、積極的に褒める内容';
+  } else if (overall >= 4) {
+    tone = '満足した体験として、良かった点を具体的に挙げる内容';
+  } else if (overall >= 3) {
+    tone = '普通の体験として、淡々と感想を述べる内容';
+  } else {
+    tone = '改善を期待する控えめな内容';
+  }
+
+  return `以下の評価に基づいて、眉毛まつ毛サロンの口コミを作成してください。
+
+【施術メニュー】${menu}
+
+【評価】
+- 総合満足度: ${overall}点/5点
+- 施術の仕上がり: ${quality}点/5点
+- 接客・カウンセリング: ${service}点/5点
+- 店内の雰囲気: ${atmosphere}点/5点
+- 価格・コスパ: ${value}点/5点
+
+【トーン】${tone}
+
+自然な口コミを1つだけ生成してください。`;
+}
+
+/**
+ * テンプレートから口コミを生成（フォールバック用）
+ * @param {Object} data - 評価データ
+ * @returns {string} - 生成された口コミ
+ */
+function generateReviewFromTemplate(data) {
+  const rating = data.overall || 3;
+  const menu = data.menu || '施術';
+
+  const templates = {
+    5: [
+      `初めて${menu}を体験しましたが、スタッフさんの丁寧なカウンセリングのおかげで、理想通りの仕上がりになりました。施術中もリラックスできる雰囲気で、あっという間に終わりました。仕上がりも持ちも最高で、友達にもおすすめしたいサロンです。`,
+      `${menu}でお世話になりました。カウンセリングがとても丁寧で、私の希望をしっかり聞いてくださいました。技術力が高く、自然で美しい仕上がりに大満足です。店内も清潔感があり、また絶対リピートします。`,
+      `今まで色々なサロンを試しましたが、ここが一番良かったです。${menu}の仕上がりが素晴らしく、毎朝のメイク時間が短縮されました。スタッフさんも親切で、価格以上の価値があると思います。`
+    ],
+    4: [
+      `${menu}を受けました。スタッフさんの対応も良く、仕上がりも綺麗で満足しています。駅からも近くて通いやすいので、また利用したいと思います。`,
+      `丁寧なカウンセリングで安心してお任せできました。${menu}の仕上がりも良く、友人にも褒められました。次回も同じスタッフさんにお願いしたいです。`,
+      `初めての来店でしたが、スタッフさんが親切に説明してくださり、リラックスして施術を受けられました。${menu}の仕上がりも満足です。`
+    ],
+    3: [
+      `${menu}を体験しました。スタッフさんの対応は丁寧で、仕上がりも悪くないと思います。また機会があれば利用したいです。`,
+      `予約通りの時間で施術していただきました。${menu}の仕上がりは期待通りでした。普通に良いサロンだと思います。`,
+      `${menu}で伺いました。カウンセリングもしっかりしていて、施術も丁寧でした。特に不満はありませんでした。`
+    ],
+    2: [
+      `${menu}を受けました。もう少しカウンセリングに時間をかけていただけると、より希望に近い仕上がりになったかもしれません。`,
+      `施術自体は問題なかったのですが、思っていた仕上がりと少し違いました。次回はもっと詳しく希望を伝えてみようと思います。`
+    ],
+    1: [
+      `今回の${menu}は期待していた仕上がりではありませんでした。もう少しカウンセリングで希望を聞いていただきたかったです。`,
+      `残念ながら今回は満足できる仕上がりではありませんでした。改善を期待しています。`
+    ]
+  };
+
+  const ratingTemplates = templates[rating] || templates[3];
+  const randomIndex = Math.floor(Math.random() * ratingTemplates.length);
+
+  return ratingTemplates[randomIndex];
 }
 
 /**
@@ -165,14 +347,15 @@ function saveReviewData(data) {
 
   // 交互の背景色
   if (newRow % 2 === 0) {
-    range.setBackground('#FBF6E9');  // 薄いゴールド
+    range.setBackground('#F7F3E3');  // 薄いゴールド
   }
 
   // 口コミ内容セルを折り返し設定
   sheet.getRange(newRow, 8).setWrap(true);
 
   return {
-    success: true,
+    status: 'success',
+    message: 'データが保存されました',
     rowNumber: newRow
   };
 }
@@ -278,6 +461,24 @@ function sendDailyReport() {
     subject: `[KATEstageLASH] 口コミレポート ${today}`,
     htmlBody: htmlBody
   });
+}
+
+/**
+ * AI生成テスト用関数
+ */
+function testAIGeneration() {
+  const testData = {
+    action: 'generate',
+    menu: 'まつげパーマ（パリジェンヌラッシュリフト）',
+    overall: 5,
+    quality: 5,
+    service: 5,
+    atmosphere: 4,
+    value: 4
+  };
+
+  const result = generateReviewWithAI(testData);
+  Logger.log('AI Generation Result: ' + JSON.stringify(result));
 }
 
 /**

@@ -4,23 +4,13 @@
  */
 
 // =====================================================
-// Configuration
+// Configuration (config.jsから読み込み)
 // =====================================================
 
-const CONFIG = {
-    // OpenAI API Key (別途設定してください)
-    OPENAI_API_KEY: '',
-
-    // Google Apps Script Web App URL (スプレッドシート連携用)
-    SPREADSHEET_URL: 'https://script.google.com/macros/s/AKfycbzJd0_cZYDFyY9BhPkyvGiYyTbIlNnS2XaBLGd-HhZLMZss_sjchl7SgZYNMsE-IhTC/exec',
-
-    // Google Review URL
+const CONFIG = window.CONFIG || {
+    GAS_URL: '',
     GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
-
-    // Salon Info
     SALON_NAME: 'KATEstageLASH 蒲田西口店',
-
-    // Review Settings
     MAX_CHARS: 500,
     MIN_CHARS: 50
 };
@@ -78,7 +68,7 @@ const ratingTexts = {
     2: 'もう少し頑張ってほしいです',
     3: '普通でした',
     4: '満足しています',
-    5: '大変満足しています！'
+    5: '大変満足しています'
 };
 
 // =====================================================
@@ -87,9 +77,9 @@ const ratingTexts = {
 
 const reviewTemplates = {
     5: [
-        '初めて{menu}を体験しましたが、スタッフさんの丁寧なカウンセリングのおかげで、理想通りの仕上がりになりました！施術中もリラックスできる雰囲気で、あっという間に終わりました。仕上がりも持ちも最高で、友達にもおすすめしたいサロンです。',
-        '{menu}でお世話になりました。カウンセリングがとても丁寧で、私の希望をしっかり聞いてくださいました。技術力が高く、自然で美しい仕上がりに大満足です！店内も清潔感があり、また絶対リピートします。',
-        '今まで色々なサロンを試しましたが、ここが一番良かったです！{menu}の仕上がりが素晴らしく、毎朝のメイク時間が短縮されました。スタッフさんも親切で、価格以上の価値があると思います。'
+        '初めて{menu}を体験しましたが、スタッフさんの丁寧なカウンセリングのおかげで、理想通りの仕上がりになりました。施術中もリラックスできる雰囲気で、あっという間に終わりました。仕上がりも持ちも最高で、友達にもおすすめしたいサロンです。',
+        '{menu}でお世話になりました。カウンセリングがとても丁寧で、私の希望をしっかり聞いてくださいました。技術力が高く、自然で美しい仕上がりに大満足です。店内も清潔感があり、また絶対リピートします。',
+        '今まで色々なサロンを試しましたが、ここが一番良かったです。{menu}の仕上がりが素晴らしく、毎朝のメイク時間が短縮されました。スタッフさんも親切で、価格以上の価値があると思います。'
     ],
     4: [
         '{menu}を受けました。スタッフさんの対応も良く、仕上がりも綺麗で満足しています。駅からも近くて通いやすいので、また利用したいと思います。',
@@ -140,6 +130,15 @@ function initializeStarRatings() {
                 setRating(category, value, rating);
             });
 
+            // Keyboard support
+            star.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const value = parseInt(star.dataset.value);
+                    setRating(category, value, rating);
+                }
+            });
+
             // Hover effects (desktop)
             star.addEventListener('mouseenter', () => {
                 const value = parseInt(star.dataset.value);
@@ -158,11 +157,9 @@ function setRating(category, value, ratingContainer) {
 
     const stars = ratingContainer.querySelectorAll('.star');
     stars.forEach((star, index) => {
-        if (index < value) {
-            star.classList.add('active');
-        } else {
-            star.classList.remove('active');
-        }
+        const isActive = index < value;
+        star.classList.toggle('active', isActive);
+        star.setAttribute('aria-checked', isActive ? 'true' : 'false');
     });
 
     // Update overall rating text
@@ -177,9 +174,9 @@ function setRating(category, value, ratingContainer) {
                 if (otherRating) {
                     const otherStars = otherRating.querySelectorAll('.star');
                     otherStars.forEach((star, index) => {
-                        if (index < value) {
-                            star.classList.add('active');
-                        }
+                        const isActive = index < value;
+                        star.classList.toggle('active', isActive);
+                        star.setAttribute('aria-checked', isActive ? 'true' : 'false');
                     });
                 }
             }
@@ -277,6 +274,12 @@ function updateProgress() {
     const progress = (state.currentStep / 3) * 100;
     elements.progressFill.style.width = `${progress}%`;
 
+    // Update progress bar ARIA
+    const progressBar = elements.progressFill.parentElement;
+    if (progressBar) {
+        progressBar.setAttribute('aria-valuenow', Math.round(progress));
+    }
+
     elements.steps.forEach((step, index) => {
         step.classList.remove('active', 'completed');
         if (index + 1 === state.currentStep) {
@@ -307,16 +310,16 @@ function updateCharCount() {
     elements.charCount.textContent = count;
 
     if (count > CONFIG.MAX_CHARS) {
-        elements.charCount.style.color = '#F44336';
+        elements.charCount.style.color = '#C62828';
     } else if (count < CONFIG.MIN_CHARS) {
-        elements.charCount.style.color = '#FF9800';
+        elements.charCount.style.color = '#F57C00';
     } else {
         elements.charCount.style.color = '#9E9E9E';
     }
 }
 
 // =====================================================
-// Review Generation
+// Review Generation (GAS経由でAI生成)
 // =====================================================
 
 async function generateReview() {
@@ -328,11 +331,11 @@ async function generateReview() {
     try {
         let review;
 
-        // Try API first
-        if (CONFIG.OPENAI_API_KEY && CONFIG.OPENAI_API_KEY !== 'YOUR_OPENAI_API_KEY_HERE') {
-            review = await generateReviewWithAPI();
+        // GAS経由でAI生成を試みる
+        if (CONFIG.GAS_URL) {
+            review = await generateReviewWithGAS();
         } else {
-            // Use fallback templates
+            // GAS URLが設定されていない場合はテンプレートを使用
             review = generateReviewFromTemplate();
         }
 
@@ -368,58 +371,45 @@ async function generateReview() {
     }
 }
 
-async function generateReviewWithAPI() {
-    const prompt = createReviewPrompt();
+/**
+ * GAS経由でAI口コミを生成
+ */
+async function generateReviewWithGAS() {
+    const data = {
+        action: 'generate',
+        menu: state.selectedMenu,
+        overall: state.ratings.overall,
+        quality: state.ratings.quality,
+        service: state.ratings.service,
+        atmosphere: state.ratings.atmosphere,
+        value: state.ratings.value
+    };
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(CONFIG.GAS_URL, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}`
+            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
-            messages: [
-                {
-                    role: 'system',
-                    content: `あなたは美容サロンの口コミを作成するアシスタントです。
-                    お客様の満足度に基づいて、自然で具体的な口コミを生成してください。
-                    口コミは日本語で、100〜200文字程度で作成してください。
-                    絵文字は使用せず、丁寧な言葉遣いで書いてください。`
-                },
-                {
-                    role: 'user',
-                    content: prompt
-                }
-            ],
-            max_tokens: 300,
-            temperature: 0.8
-        })
+        body: JSON.stringify(data),
+        mode: 'cors'
     });
 
     if (!response.ok) {
-        throw new Error('API request failed');
+        throw new Error('GAS request failed');
     }
 
-    const data = await response.json();
-    return data.choices[0].message.content.trim();
+    const result = await response.json();
+
+    if (result.status === 'success' && result.review) {
+        return result.review;
+    }
+
+    throw new Error('Invalid response from GAS');
 }
 
-function createReviewPrompt() {
-    const { overall, quality, service, atmosphere, value } = state.ratings;
-
-    return `以下の評価に基づいて、眉毛まつ毛サロン「${CONFIG.SALON_NAME}」の口コミを作成してください。
-
-施術メニュー: ${state.selectedMenu}
-総合満足度: ${overall}点/5点
-施術の仕上がり: ${quality}点/5点
-接客・カウンセリング: ${service}点/5点
-店内の雰囲気: ${atmosphere}点/5点
-価格・コスパ: ${value}点/5点
-
-${overall >= 4 ? '満足した点を具体的に褒める内容で' : overall >= 3 ? '良かった点と感想を含めて' : '改善を期待する控えめな内容で'}、口コミを作成してください。`;
-}
-
+/**
+ * テンプレートから口コミを生成（フォールバック）
+ */
 function generateReviewFromTemplate() {
     const rating = state.ratings.overall;
     const templates = reviewTemplates[rating] || reviewTemplates[3];
@@ -485,12 +475,13 @@ function showToast(message) {
 // =====================================================
 
 async function saveToSpreadsheet() {
-    if (!CONFIG.SPREADSHEET_URL || CONFIG.SPREADSHEET_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-        console.log('Spreadsheet URL not configured');
+    if (!CONFIG.GAS_URL) {
+        console.log('GAS URL not configured');
         return;
     }
 
     const data = {
+        action: 'save',
         timestamp: new Date().toISOString(),
         menu: state.selectedMenu,
         overallRating: state.ratings.overall,
@@ -502,13 +493,13 @@ async function saveToSpreadsheet() {
     };
 
     try {
-        await fetch(CONFIG.SPREADSHEET_URL, {
+        await fetch(CONFIG.GAS_URL, {
             method: 'POST',
-            mode: 'no-cors',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            mode: 'cors'
         });
 
         console.log('Data saved to spreadsheet');
