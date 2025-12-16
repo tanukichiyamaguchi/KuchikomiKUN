@@ -44,98 +44,132 @@
                 本日の施術はいかがでしたか？
             </h2>
 
-            <!-- Menu Selection -->
-            <div class="form-group">
-                <label class="form-label" for="menuSelect">ご利用メニュー</label>
-                <select id="menuSelect" class="form-select">
-                    <option value="">選択してください</option>
-                    <optgroup label="まつげパーマ">
-                        <option value="まつげパーマ（パリジェンヌラッシュリフト）">まつげパーマ（パリジェンヌラッシュリフト）</option>
-                        <option value="のびるまつげパーマ（幹細胞トリートメント付）">のびるまつげパーマ（幹細胞トリートメント付）</option>
-                        <option value="ラッシュリフト">ラッシュリフト</option>
-                    </optgroup>
-                    <optgroup label="アイブロウ（眉毛）">
-                        <option value="アイブロウ（眉毛wax）">アイブロウ（眉毛wax）</option>
-                        <option value="眉毛パーマ（ハリウッドブロウリフト）">眉毛パーマ（ハリウッドブロウリフト）</option>
-                        <option value="メンズアイブロウ">メンズアイブロウ</option>
-                    </optgroup>
-                    <optgroup label="セットメニュー">
-                        <option value="まつ毛パーマ＋眉毛wax">まつ毛パーマ＋眉毛wax</option>
-                        <option value="のびるまつげパーマ＋眉毛wax">のびるまつげパーマ＋眉毛wax</option>
-                        <option value="まつ毛パーマ＋眉毛パーマ（ハリウッドブロウリフト）">まつ毛パーマ＋眉毛パーマ</option>
-                    </optgroup>
-                    <optgroup label="学割メニュー">
-                        <option value="学割まつげパーマ">学割まつげパーマ</option>
-                        <option value="学割アイブロウ">学割アイブロウ</option>
-                        <option value="学割まつげパーマ＋眉毛wax">学割まつげパーマ＋眉毛wax</option>
-                    </optgroup>
-                    <optgroup label="その他">
-                        <option value="お任せコース">お任せコース</option>
-                        <option value="その他">その他</option>
-                    </optgroup>
-                </select>
+            <!-- Menu Selection - Category Based Buttons -->
+            <div class="form-group menu-selection" id="menuSelection">
+                <label class="form-label">ご利用メニュー</label>
+
+                <!-- Category Buttons -->
+                <div class="category-buttons" id="categoryButtons">
+                    <button type="button" class="category-btn" data-category="lashperm">
+                        <span class="category-name">まつげパーマ</span>
+                    </button>
+                    <button type="button" class="category-btn" data-category="eyebrow">
+                        <span class="category-name">アイブロウ</span>
+                    </button>
+                    <button type="button" class="category-btn" data-category="set">
+                        <span class="category-name">セットメニュー</span>
+                    </button>
+                    <button type="button" class="category-btn" data-category="student">
+                        <span class="category-name">学割メニュー</span>
+                    </button>
+                    <button type="button" class="category-btn" data-category="other">
+                        <span class="category-name">その他</span>
+                    </button>
+                </div>
+
+                <!-- Menu Items (shown after category selection) -->
+                <div class="menu-items-container" id="menuItemsContainer" style="display: none;">
+                    <button type="button" class="back-to-categories" id="backToCategories">
+                        <span class="back-arrow">←</span>
+                        カテゴリに戻る
+                    </button>
+                    <div class="menu-items" id="menuItems"></div>
+                </div>
+
+                <!-- Selected Menu Display -->
+                <div class="selected-menu" id="selectedMenuDisplay" style="display: none;">
+                    <span class="selected-label">選択中:</span>
+                    <span class="selected-value" id="selectedMenuValue"></span>
+                    <button type="button" class="change-menu-btn" id="changeMenuBtn">変更</button>
+                </div>
             </div>
 
             <!-- Rating Categories -->
-            <div class="rating-categories">
+            <div class="rating-categories" id="ratingSection">
                 <!-- Overall Satisfaction -->
                 <div class="rating-card main-rating">
                     <label class="rating-label" id="overall-label">総合満足度</label>
-                    <div class="star-rating" data-category="overall" role="radiogroup" aria-labelledby="overall-label">
+                    <div class="star-rating swipeable" data-category="overall" role="radiogroup" aria-labelledby="overall-label">
                         <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
                         <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
                         <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
                         <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
                         <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
                     </div>
-                    <span class="rating-text" id="overallText">タップして評価</span>
+                    <span class="rating-text" id="overallText">タップまたはスライドで評価</span>
                 </div>
 
-                <!-- Detailed Ratings -->
-                <div class="detailed-ratings">
+                <!-- Detailed Ratings - Single Column -->
+                <div class="detailed-ratings single-column">
                     <div class="rating-card">
-                        <label class="rating-label" id="quality-label">施術の仕上がり</label>
-                        <div class="star-rating small" data-category="quality" role="radiogroup" aria-labelledby="quality-label">
-                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                        <div class="rating-row">
+                            <label class="rating-label" id="quality-label">施術の仕上がり</label>
+                            <div class="star-rating swipeable" data-category="quality" role="radiogroup" aria-labelledby="quality-label">
+                                <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="rating-card">
-                        <label class="rating-label" id="service-label">接客・カウンセリング</label>
-                        <div class="star-rating small" data-category="service" role="radiogroup" aria-labelledby="service-label">
-                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                        <div class="rating-row">
+                            <label class="rating-label" id="service-label">接客・カウンセリング</label>
+                            <div class="star-rating swipeable" data-category="service" role="radiogroup" aria-labelledby="service-label">
+                                <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="rating-card">
-                        <label class="rating-label" id="atmosphere-label">店内の雰囲気</label>
-                        <div class="star-rating small" data-category="atmosphere" role="radiogroup" aria-labelledby="atmosphere-label">
-                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                        <div class="rating-row">
+                            <label class="rating-label" id="atmosphere-label">店内の雰囲気</label>
+                            <div class="star-rating swipeable" data-category="atmosphere" role="radiogroup" aria-labelledby="atmosphere-label">
+                                <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="rating-card">
-                        <label class="rating-label" id="value-label">価格・コスパ</label>
-                        <div class="star-rating small" data-category="value" role="radiogroup" aria-labelledby="value-label">
-                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                        <div class="rating-row">
+                            <label class="rating-label" id="value-label">価格・コスパ</label>
+                            <div class="star-rating swipeable" data-category="value" role="radiogroup" aria-labelledby="value-label">
+                                <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
+                                <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Optional Comment Field -->
+            <div class="form-group comment-section">
+                <label class="form-label" for="userComment">
+                    具体的なコメント
+                    <span class="optional-badge">任意</span>
+                </label>
+                <textarea
+                    id="userComment"
+                    class="comment-textarea"
+                    placeholder="良かった点や気になった点など、具体的にお聞かせください（AI口コミに反映されます）"
+                    rows="3"
+                    maxlength="200"
+                ></textarea>
+                <div class="comment-hint">
+                    <span id="commentCharCount">0</span> / 200文字
                 </div>
             </div>
 

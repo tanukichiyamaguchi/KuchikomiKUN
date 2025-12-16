@@ -16,6 +16,52 @@ const CONFIG = window.CONFIG || {
 };
 
 // =====================================================
+// Menu Data - Category Based
+// =====================================================
+
+const menuData = {
+    lashperm: {
+        name: 'まつげパーマ',
+        items: [
+            'まつげパーマ（パリジェンヌラッシュリフト）',
+            'のびるまつげパーマ（幹細胞トリートメント付）',
+            'ラッシュリフト'
+        ]
+    },
+    eyebrow: {
+        name: 'アイブロウ',
+        items: [
+            'アイブロウ（眉毛wax）',
+            '眉毛パーマ（ハリウッドブロウリフト）',
+            'メンズアイブロウ'
+        ]
+    },
+    set: {
+        name: 'セットメニュー',
+        items: [
+            'まつ毛パーマ＋眉毛wax',
+            'のびるまつげパーマ＋眉毛wax',
+            'まつ毛パーマ＋眉毛パーマ（ハリウッドブロウリフト）'
+        ]
+    },
+    student: {
+        name: '学割メニュー',
+        items: [
+            '学割まつげパーマ',
+            '学割アイブロウ',
+            '学割まつげパーマ＋眉毛wax'
+        ]
+    },
+    other: {
+        name: 'その他',
+        items: [
+            'お任せコース',
+            'その他'
+        ]
+    }
+};
+
+// =====================================================
 // State Management
 // =====================================================
 
@@ -29,6 +75,8 @@ const state = {
         value: 0
     },
     selectedMenu: '',
+    selectedCategory: '',
+    userComment: '',
     generatedReview: '',
     editedReview: ''
 };
@@ -41,7 +89,6 @@ const elements = {
     progressFill: document.getElementById('progressFill'),
     steps: document.querySelectorAll('.step'),
     stepSections: document.querySelectorAll('.step-section'),
-    menuSelect: document.getElementById('menuSelect'),
     overallText: document.getElementById('overallText'),
     nextToStep2: document.getElementById('nextToStep2'),
     nextToStep3: document.getElementById('nextToStep3'),
@@ -56,7 +103,20 @@ const elements = {
     previewStars: document.getElementById('previewStars'),
     copyReviewBtn: document.getElementById('copyReviewBtn'),
     googleReviewBtn: document.getElementById('googleReviewBtn'),
-    toast: document.getElementById('toast')
+    toast: document.getElementById('toast'),
+    // Menu selection elements
+    categoryButtons: document.getElementById('categoryButtons'),
+    menuItemsContainer: document.getElementById('menuItemsContainer'),
+    menuItems: document.getElementById('menuItems'),
+    backToCategories: document.getElementById('backToCategories'),
+    selectedMenuDisplay: document.getElementById('selectedMenuDisplay'),
+    selectedMenuValue: document.getElementById('selectedMenuValue'),
+    changeMenuBtn: document.getElementById('changeMenuBtn'),
+    // Rating section
+    ratingSection: document.getElementById('ratingSection'),
+    // Comment
+    userComment: document.getElementById('userComment'),
+    commentCharCount: document.getElementById('commentCharCount')
 };
 
 // =====================================================
@@ -107,12 +167,13 @@ const reviewTemplates = {
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeStarRatings();
+    initializeMenuSelection();
     initializeEventListeners();
     updateProgress();
 });
 
 // =====================================================
-// Star Rating Functions
+// Star Rating Functions with Swipe Support
 // =====================================================
 
 function initializeStarRatings() {
@@ -121,9 +182,13 @@ function initializeStarRatings() {
     starRatings.forEach(rating => {
         const stars = rating.querySelectorAll('.star');
         const category = rating.dataset.category;
+        const isSwipeable = rating.classList.contains('swipeable');
+
+        // Track touch state
+        let isTouching = false;
 
         stars.forEach(star => {
-            // Touch/Click events
+            // Click events
             star.addEventListener('click', (e) => {
                 e.preventDefault();
                 const value = parseInt(star.dataset.value);
@@ -141,14 +206,86 @@ function initializeStarRatings() {
 
             // Hover effects (desktop)
             star.addEventListener('mouseenter', () => {
-                const value = parseInt(star.dataset.value);
-                highlightStars(rating, value);
+                if (!isTouching) {
+                    const value = parseInt(star.dataset.value);
+                    highlightStars(rating, value);
+                }
             });
 
             star.addEventListener('mouseleave', () => {
-                resetStarHighlight(rating, state.ratings[category]);
+                if (!isTouching) {
+                    resetStarHighlight(rating, state.ratings[category]);
+                }
             });
         });
+
+        // Swipe/Slide support for touch devices
+        if (isSwipeable) {
+            // Touch start
+            rating.addEventListener('touchstart', (e) => {
+                isTouching = true;
+                handleTouchMove(e, rating, category);
+            }, { passive: true });
+
+            // Touch move - slide across stars
+            rating.addEventListener('touchmove', (e) => {
+                handleTouchMove(e, rating, category);
+            }, { passive: true });
+
+            // Touch end
+            rating.addEventListener('touchend', () => {
+                isTouching = false;
+            });
+
+            // Mouse drag support (desktop)
+            let isMouseDown = false;
+
+            rating.addEventListener('mousedown', (e) => {
+                isMouseDown = true;
+                handleMouseMove(e, rating, category);
+            });
+
+            rating.addEventListener('mousemove', (e) => {
+                if (isMouseDown) {
+                    handleMouseMove(e, rating, category);
+                }
+            });
+
+            rating.addEventListener('mouseup', () => {
+                isMouseDown = false;
+            });
+
+            rating.addEventListener('mouseleave', () => {
+                isMouseDown = false;
+            });
+        }
+    });
+}
+
+function handleTouchMove(e, rating, category) {
+    const touch = e.touches[0];
+    const stars = rating.querySelectorAll('.star');
+
+    stars.forEach(star => {
+        const rect = star.getBoundingClientRect();
+        if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+            touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+            const value = parseInt(star.dataset.value);
+            setRating(category, value, rating);
+        }
+    });
+}
+
+function handleMouseMove(e, rating, category) {
+    const stars = rating.querySelectorAll('.star');
+
+    stars.forEach(star => {
+        const rect = star.getBoundingClientRect();
+        if (e.clientX >= rect.left && e.clientX <= rect.right &&
+            e.clientY >= rect.top && e.clientY <= rect.bottom) {
+            const value = parseInt(star.dataset.value);
+            setRating(category, value, rating);
+        }
     });
 }
 
@@ -205,16 +342,94 @@ function resetStarHighlight(container, currentValue) {
 }
 
 // =====================================================
+// Menu Selection Functions
+// =====================================================
+
+function initializeMenuSelection() {
+    // Category button clicks
+    const categoryBtns = elements.categoryButtons.querySelectorAll('.category-btn');
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const category = btn.dataset.category;
+            showMenuItems(category);
+        });
+    });
+
+    // Back to categories
+    elements.backToCategories.addEventListener('click', () => {
+        showCategories();
+    });
+
+    // Change menu button
+    elements.changeMenuBtn.addEventListener('click', () => {
+        resetMenuSelection();
+    });
+}
+
+function showMenuItems(category) {
+    state.selectedCategory = category;
+    const menuInfo = menuData[category];
+
+    // Hide categories, show menu items
+    elements.categoryButtons.style.display = 'none';
+    elements.menuItemsContainer.style.display = 'block';
+
+    // Populate menu items
+    elements.menuItems.innerHTML = '';
+    menuInfo.items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'menu-item-btn';
+        btn.textContent = item;
+        btn.addEventListener('click', () => {
+            selectMenuItem(item);
+        });
+        elements.menuItems.appendChild(btn);
+    });
+}
+
+function showCategories() {
+    elements.categoryButtons.style.display = 'flex';
+    elements.menuItemsContainer.style.display = 'none';
+    state.selectedCategory = '';
+}
+
+function selectMenuItem(menuName) {
+    state.selectedMenu = menuName;
+
+    // Hide menu items, show selected display
+    elements.categoryButtons.style.display = 'none';
+    elements.menuItemsContainer.style.display = 'none';
+    elements.selectedMenuDisplay.style.display = 'flex';
+    elements.selectedMenuValue.textContent = menuName;
+
+    // Auto scroll to rating section
+    setTimeout(() => {
+        elements.ratingSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }, 300);
+
+    validateStep1();
+}
+
+function resetMenuSelection() {
+    state.selectedMenu = '';
+    state.selectedCategory = '';
+
+    elements.selectedMenuDisplay.style.display = 'none';
+    elements.categoryButtons.style.display = 'flex';
+    elements.menuItemsContainer.style.display = 'none';
+
+    validateStep1();
+}
+
+// =====================================================
 // Event Listeners
 // =====================================================
 
 function initializeEventListeners() {
-    // Menu selection
-    elements.menuSelect.addEventListener('change', () => {
-        state.selectedMenu = elements.menuSelect.value;
-        validateStep1();
-    });
-
     // Navigation buttons
     elements.nextToStep2.addEventListener('click', () => goToStep(2));
     elements.nextToStep3.addEventListener('click', () => goToStep(3));
@@ -227,6 +442,14 @@ function initializeEventListeners() {
         updateCharCount();
         validateStep2();
     });
+
+    // User comment
+    if (elements.userComment) {
+        elements.userComment.addEventListener('input', () => {
+            state.userComment = elements.userComment.value;
+            updateCommentCharCount();
+        });
+    }
 
     // Regenerate button
     elements.regenerateBtn.addEventListener('click', generateReview);
@@ -318,6 +541,13 @@ function updateCharCount() {
     }
 }
 
+function updateCommentCharCount() {
+    if (elements.commentCharCount && elements.userComment) {
+        const count = elements.userComment.value.length;
+        elements.commentCharCount.textContent = count;
+    }
+}
+
 // =====================================================
 // Review Generation (GAS経由でAI生成 - JSONP方式)
 // =====================================================
@@ -405,7 +635,7 @@ function generateReviewWithGAS() {
             }
         };
 
-        // URLパラメータを構築
+        // URLパラメータを構築（ユーザーコメントを含む）
         const params = new URLSearchParams({
             callback: callbackName,
             action: 'generate',
@@ -414,7 +644,8 @@ function generateReviewWithGAS() {
             quality: state.ratings.quality,
             service: state.ratings.service,
             atmosphere: state.ratings.atmosphere,
-            value: state.ratings.value
+            value: state.ratings.value,
+            comment: state.userComment || ''
         });
 
         // scriptタグを作成してJSONPリクエスト
@@ -438,7 +669,14 @@ function generateReviewFromTemplate() {
     const templates = reviewTemplates[rating] || reviewTemplates[3];
     const template = templates[Math.floor(Math.random() * templates.length)];
 
-    return template.replace('{menu}', state.selectedMenu);
+    let review = template.replace('{menu}', state.selectedMenu);
+
+    // ユーザーコメントがある場合は追加
+    if (state.userComment && state.userComment.trim()) {
+        review += ' ' + state.userComment.trim();
+    }
+
+    return review;
 }
 
 // =====================================================
@@ -511,6 +749,7 @@ async function saveToSpreadsheet() {
         serviceRating: state.ratings.service,
         atmosphereRating: state.ratings.atmosphere,
         valueRating: state.ratings.value,
+        userComment: state.userComment,
         review: state.editedReview
     };
 

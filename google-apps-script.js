@@ -98,14 +98,15 @@ function doGet(e) {
 
     switch (action) {
       case 'generate':
-        // AI口コミ生成
+        // AI口コミ生成（ユーザーコメント対応）
         const data = {
           menu: e.parameter.menu || '',
           overall: parseInt(e.parameter.overall) || 3,
           quality: parseInt(e.parameter.quality) || 3,
           service: parseInt(e.parameter.service) || 3,
           atmosphere: parseInt(e.parameter.atmosphere) || 3,
-          value: parseInt(e.parameter.value) || 3
+          value: parseInt(e.parameter.value) || 3,
+          comment: e.parameter.comment || ''
         };
         result = generateReviewWithAI(data);
         break;
@@ -114,7 +115,7 @@ function doGet(e) {
         result = {
           status: 'ok',
           message: 'KATEstageLASH Review System API is running',
-          version: '2.1'
+          version: '2.2'
         };
         break;
     }
@@ -255,7 +256,7 @@ function generateReviewWithAI(data) {
  * @returns {string} - プロンプト
  */
 function createReviewPrompt(data) {
-  const { menu, overall, quality, service, atmosphere, value } = data;
+  const { menu, overall, quality, service, atmosphere, value, comment } = data;
 
   let tone = '';
   if (overall >= 5) {
@@ -268,7 +269,7 @@ function createReviewPrompt(data) {
     tone = '改善を期待する控えめな内容';
   }
 
-  return `以下の評価に基づいて、眉毛まつ毛サロンの口コミを作成してください。
+  let prompt = `以下の評価に基づいて、眉毛まつ毛サロンの口コミを作成してください。
 
 【施術メニュー】${menu}
 
@@ -279,9 +280,23 @@ function createReviewPrompt(data) {
 - 店内の雰囲気: ${atmosphere}点/5点
 - 価格・コスパ: ${value}点/5点
 
-【トーン】${tone}
+【トーン】${tone}`;
+
+  // ユーザーコメントがある場合は追加
+  if (comment && comment.trim()) {
+    prompt += `
+
+【お客様のコメント】
+${comment.trim()}
+
+上記のお客様のコメントの内容を自然に取り入れて、口コミを作成してください。`;
+  }
+
+  prompt += `
 
 自然な口コミを1つだけ生成してください。`;
+
+  return prompt;
 }
 
 /**
@@ -292,6 +307,7 @@ function createReviewPrompt(data) {
 function generateReviewFromTemplate(data) {
   const rating = data.overall || 3;
   const menu = data.menu || '施術';
+  const comment = data.comment || '';
 
   const templates = {
     5: [
@@ -322,7 +338,14 @@ function generateReviewFromTemplate(data) {
   const ratingTemplates = templates[rating] || templates[3];
   const randomIndex = Math.floor(Math.random() * ratingTemplates.length);
 
-  return ratingTemplates[randomIndex];
+  let review = ratingTemplates[randomIndex];
+
+  // ユーザーコメントがある場合は追加
+  if (comment && comment.trim()) {
+    review += ' ' + comment.trim();
+  }
+
+  return review;
 }
 
 /**

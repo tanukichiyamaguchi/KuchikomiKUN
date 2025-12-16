@@ -448,7 +448,168 @@ body {
 }
 
 /* =====================================================
-   Detailed Ratings Grid
+   Menu Selection - Category Buttons
+   ===================================================== */
+
+.menu-selection {
+    margin-bottom: var(--space-xl);
+}
+
+.category-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.category-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    font-family: var(--font-primary);
+    color: var(--gray-700);
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    min-height: var(--touch-target);
+}
+
+.category-btn:hover {
+    border-color: var(--gold-primary);
+    background: var(--gold-subtle);
+}
+
+.category-btn:active {
+    transform: scale(0.98);
+}
+
+.category-btn.selected {
+    border-color: var(--gold-primary);
+    background: var(--gold-lighter);
+    color: var(--gold-dark);
+}
+
+.category-name {
+    letter-spacing: 0.02em;
+}
+
+/* Menu Items Container */
+.menu-items-container {
+    animation: fadeSlideIn 0.3s ease-out;
+}
+
+.back-to-categories {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0;
+    margin-bottom: var(--space-md);
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-primary);
+    transition: color var(--transition-fast);
+}
+
+.back-to-categories:hover {
+    color: var(--gold-dark);
+}
+
+.back-arrow {
+    font-size: 1rem;
+}
+
+.menu-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.menu-item-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    font-size: 0.875rem;
+    font-weight: 400;
+    font-family: var(--font-primary);
+    color: var(--gray-700);
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    min-height: var(--touch-target);
+    text-align: left;
+}
+
+.menu-item-btn:hover {
+    border-color: var(--gold-primary);
+    background: var(--gold-subtle);
+}
+
+.menu-item-btn:active {
+    transform: scale(0.98);
+}
+
+/* Selected Menu Display */
+.selected-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--gold-lighter);
+    border: 1px solid var(--gold-light);
+    border-radius: var(--radius-md);
+    animation: fadeSlideIn 0.3s ease-out;
+}
+
+.selected-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+}
+
+.selected-value {
+    flex: 1;
+    font-size: 0.875rem;
+    color: var(--gray-800);
+    font-weight: 500;
+}
+
+.change-menu-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    font-family: var(--font-primary);
+    color: var(--gold-dark);
+    background: var(--white);
+    border: 1px solid var(--gold-primary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.change-menu-btn:hover {
+    background: var(--gold-primary);
+    color: var(--white);
+}
+
+/* =====================================================
+   Detailed Ratings - Single Column Layout
    ===================================================== */
 
 .detailed-ratings {
@@ -457,25 +618,131 @@ body {
     gap: var(--space-sm);
 }
 
-.detailed-ratings .rating-card {
+.detailed-ratings.single-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.detailed-ratings.single-column .rating-card {
+    padding: var(--space-md) var(--space-lg);
+    border: 1px solid var(--gray-100);
+}
+
+.detailed-ratings.single-column .rating-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+}
+
+.detailed-ratings.single-column .rating-label {
+    font-size: 0.75rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    min-width: 100px;
+}
+
+.detailed-ratings.single-column .star-rating {
+    gap: var(--space-xs);
+    flex-shrink: 0;
+}
+
+.detailed-ratings.single-column .star {
+    font-size: 1.5rem;
+    padding: var(--space-xs);
+}
+
+/* Legacy 2-column support */
+.detailed-ratings:not(.single-column) .rating-card {
     padding: var(--space-md);
     text-align: center;
     border: 1px solid var(--gray-100);
 }
 
-.detailed-ratings .rating-label {
+.detailed-ratings:not(.single-column) .rating-label {
     font-size: 0.625rem;
     margin-bottom: var(--space-sm);
     letter-spacing: 0.1em;
 }
 
-.detailed-ratings .star-rating {
+.detailed-ratings:not(.single-column) .star-rating {
     gap: 1px;
 }
 
-.detailed-ratings .star {
+.detailed-ratings:not(.single-column) .star {
     font-size: 1.375rem;
     padding: 2px;
+}
+
+/* =====================================================
+   Comment Section
+   ===================================================== */
+
+.comment-section {
+    margin-bottom: var(--space-xl);
+}
+
+.comment-section .form-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.optional-badge {
+    font-size: 0.5625rem;
+    font-weight: 500;
+    color: var(--gray-400);
+    background: var(--gray-100);
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    text-transform: none;
+    letter-spacing: 0.05em;
+}
+
+.comment-textarea {
+    width: 100%;
+    padding: var(--space-md);
+    font-size: 0.875rem;
+    font-family: var(--font-primary);
+    line-height: 1.7;
+    color: var(--gray-800);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    resize: vertical;
+    min-height: 80px;
+    transition: all var(--transition-fast);
+}
+
+.comment-textarea:focus {
+    outline: none;
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 0 3px var(--gold-glow);
+    background: var(--white);
+}
+
+.comment-textarea::placeholder {
+    color: var(--gray-400);
+    font-size: 0.8125rem;
+}
+
+.comment-hint {
+    text-align: right;
+    font-size: 0.6875rem;
+    color: var(--gray-400);
+    margin-top: var(--space-xs);
+    letter-spacing: 0.05em;
+}
+
+/* =====================================================
+   Swipeable Star Rating
+   ===================================================== */
+
+.star-rating.swipeable {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 /* =====================================================
