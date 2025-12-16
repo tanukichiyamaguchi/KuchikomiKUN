@@ -2,11 +2,14 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#FFFFFF">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
     <title>KATEstageLASH 蒲田西口店 - ご感想をお聞かせください</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +17,7 @@
         <!-- Header with Logo -->
         <header class="header">
             <div class="logo-container">
-                <img src="logo.png" alt="KATEstageLASH" class="logo" onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='block';">
+                <img src="logo.png" alt="KATEstageLASH" class="logo" onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='flex';">
                 <div class="logo-text" style="display: none;">
                     <span class="brand-name">KATEstageLASH</span>
                     <span class="branch-name">蒲田西口店</span>
@@ -24,8 +27,8 @@
         </header>
 
         <!-- Progress Bar -->
-        <div class="progress-container">
-            <div class="progress-bar">
+        <nav class="progress-container" aria-label="進捗">
+            <div class="progress-bar" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
             <div class="progress-steps">
@@ -33,18 +36,17 @@
                 <span class="step" data-step="2">口コミ</span>
                 <span class="step" data-step="3">投稿</span>
             </div>
-        </div>
+        </nav>
 
         <!-- Step 1: Rating -->
-        <section class="step-section active" id="step1">
-            <h2 class="section-title">
-                <span class="title-icon">✨</span>
+        <section class="step-section active" id="step1" aria-labelledby="step1-title">
+            <h2 class="section-title" id="step1-title">
                 本日の施術はいかがでしたか？
             </h2>
 
             <!-- Menu Selection -->
             <div class="form-group">
-                <label class="form-label">ご利用メニュー</label>
+                <label class="form-label" for="menuSelect">ご利用メニュー</label>
                 <select id="menuSelect" class="form-select">
                     <option value="">選択してください</option>
                     <optgroup label="まつげパーマ">
@@ -78,13 +80,13 @@
             <div class="rating-categories">
                 <!-- Overall Satisfaction -->
                 <div class="rating-card main-rating">
-                    <label class="rating-label">総合満足度</label>
-                    <div class="star-rating" data-category="overall">
-                        <span class="star" data-value="1">★</span>
-                        <span class="star" data-value="2">★</span>
-                        <span class="star" data-value="3">★</span>
-                        <span class="star" data-value="4">★</span>
-                        <span class="star" data-value="5">★</span>
+                    <label class="rating-label" id="overall-label">総合満足度</label>
+                    <div class="star-rating" data-category="overall" role="radiogroup" aria-labelledby="overall-label">
+                        <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
+                        <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
+                        <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
+                        <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
+                        <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
                     </div>
                     <span class="rating-text" id="overallText">タップして評価</span>
                 </div>
@@ -92,109 +94,110 @@
                 <!-- Detailed Ratings -->
                 <div class="detailed-ratings">
                     <div class="rating-card">
-                        <label class="rating-label">施術の仕上がり</label>
-                        <div class="star-rating small" data-category="quality">
-                            <span class="star" data-value="1">★</span>
-                            <span class="star" data-value="2">★</span>
-                            <span class="star" data-value="3">★</span>
-                            <span class="star" data-value="4">★</span>
-                            <span class="star" data-value="5">★</span>
+                        <label class="rating-label" id="quality-label">施術の仕上がり</label>
+                        <div class="star-rating small" data-category="quality" role="radiogroup" aria-labelledby="quality-label">
+                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
                         </div>
                     </div>
 
                     <div class="rating-card">
-                        <label class="rating-label">接客・カウンセリング</label>
-                        <div class="star-rating small" data-category="service">
-                            <span class="star" data-value="1">★</span>
-                            <span class="star" data-value="2">★</span>
-                            <span class="star" data-value="3">★</span>
-                            <span class="star" data-value="4">★</span>
-                            <span class="star" data-value="5">★</span>
+                        <label class="rating-label" id="service-label">接客・カウンセリング</label>
+                        <div class="star-rating small" data-category="service" role="radiogroup" aria-labelledby="service-label">
+                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
                         </div>
                     </div>
 
                     <div class="rating-card">
-                        <label class="rating-label">店内の雰囲気</label>
-                        <div class="star-rating small" data-category="atmosphere">
-                            <span class="star" data-value="1">★</span>
-                            <span class="star" data-value="2">★</span>
-                            <span class="star" data-value="3">★</span>
-                            <span class="star" data-value="4">★</span>
-                            <span class="star" data-value="5">★</span>
+                        <label class="rating-label" id="atmosphere-label">店内の雰囲気</label>
+                        <div class="star-rating small" data-category="atmosphere" role="radiogroup" aria-labelledby="atmosphere-label">
+                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
                         </div>
                     </div>
 
                     <div class="rating-card">
-                        <label class="rating-label">価格・コスパ</label>
-                        <div class="star-rating small" data-category="value">
-                            <span class="star" data-value="1">★</span>
-                            <span class="star" data-value="2">★</span>
-                            <span class="star" data-value="3">★</span>
-                            <span class="star" data-value="4">★</span>
-                            <span class="star" data-value="5">★</span>
+                        <label class="rating-label" id="value-label">価格・コスパ</label>
+                        <div class="star-rating small" data-category="value" role="radiogroup" aria-labelledby="value-label">
+                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
+                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <button class="btn btn-primary" id="nextToStep2" disabled>
+            <button class="btn btn-primary" id="nextToStep2" disabled aria-describedby="step1-next-hint">
                 口コミを作成する
-                <span class="btn-arrow">→</span>
+                <span class="btn-arrow" aria-hidden="true">→</span>
             </button>
+            <span id="step1-next-hint" hidden>評価を入力すると次へ進めます</span>
         </section>
 
         <!-- Step 2: Review Generation & Editing -->
-        <section class="step-section" id="step2">
-            <h2 class="section-title">
-                <span class="title-icon">📝</span>
+        <section class="step-section" id="step2" aria-labelledby="step2-title">
+            <h2 class="section-title" id="step2-title">
                 口コミを編集してください
             </h2>
 
             <div class="review-generation">
-                <div class="ai-badge">
-                    <span class="ai-icon">✨</span>
+                <div class="ai-badge" aria-label="AI提案">
+                    <span class="ai-icon" aria-hidden="true">◇</span>
                     AI提案の口コミ
                 </div>
 
-                <div class="loading-container" id="loadingContainer">
-                    <div class="loading-spinner"></div>
+                <div class="loading-container" id="loadingContainer" role="status" aria-live="polite">
+                    <div class="loading-spinner" aria-hidden="true"></div>
                     <p class="loading-text">あなたにぴったりの口コミを作成中...</p>
                 </div>
 
                 <div class="review-editor" id="reviewEditor" style="display: none;">
+                    <label for="reviewText" class="form-label">口コミ内容</label>
                     <textarea
                         id="reviewText"
                         class="review-textarea"
                         placeholder="口コミを入力してください..."
                         rows="6"
+                        aria-describedby="charCountHint"
                     ></textarea>
-                    <div class="char-count">
+                    <div class="char-count" id="charCountHint">
                         <span id="charCount">0</span> / 500文字
                     </div>
                 </div>
 
                 <button class="btn btn-secondary" id="regenerateBtn" style="display: none;">
-                    <span class="btn-icon">🔄</span>
+                    <span class="btn-icon" aria-hidden="true">↻</span>
                     別の口コミ例を見る
                 </button>
             </div>
 
             <div class="button-group">
                 <button class="btn btn-outline" id="backToStep1">
-                    <span class="btn-arrow">←</span>
+                    <span class="btn-arrow" aria-hidden="true">←</span>
                     戻る
                 </button>
                 <button class="btn btn-primary" id="nextToStep3" disabled>
                     投稿へ進む
-                    <span class="btn-arrow">→</span>
+                    <span class="btn-arrow" aria-hidden="true">→</span>
                 </button>
             </div>
         </section>
 
         <!-- Step 3: Post to Google -->
-        <section class="step-section" id="step3">
-            <h2 class="section-title">
-                <span class="title-icon">🎉</span>
+        <section class="step-section" id="step3" aria-labelledby="step3-title">
+            <h2 class="section-title" id="step3-title">
                 Google口コミに投稿
             </h2>
 
@@ -202,9 +205,9 @@
                 <div class="preview-header">
                     <span class="preview-label">投稿する口コミ</span>
                 </div>
-                <div class="preview-content" id="previewContent"></div>
+                <div class="preview-content" id="previewContent" aria-live="polite"></div>
                 <div class="preview-rating">
-                    <span class="preview-stars" id="previewStars"></span>
+                    <span class="preview-stars" id="previewStars" aria-label="評価"></span>
                 </div>
             </div>
 
@@ -214,12 +217,12 @@
                     <li>下のボタンをタップしてGoogleマップを開きます</li>
                     <li>星の数を選択してください</li>
                     <li>上の口コミ文をコピーして貼り付けてください</li>
-                    <li>「投稿」ボタンをタップして完了！</li>
+                    <li>「投稿」ボタンをタップして完了</li>
                 </ol>
             </div>
 
             <button class="btn btn-copy" id="copyReviewBtn">
-                <span class="btn-icon">📋</span>
+                <span class="btn-icon" aria-hidden="true">⎘</span>
                 口コミをコピー
             </button>
 
@@ -228,7 +231,7 @@
                rel="noopener noreferrer"
                class="btn btn-google"
                id="googleReviewBtn">
-                <svg class="google-icon" viewBox="0 0 24 24" width="24" height="24">
+                <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -239,20 +242,20 @@
 
             <div class="button-group">
                 <button class="btn btn-outline" id="backToStep2">
-                    <span class="btn-arrow">←</span>
+                    <span class="btn-arrow" aria-hidden="true">←</span>
                     戻る
                 </button>
             </div>
 
             <div class="thank-you-message">
-                <p>ご協力いただきありがとうございます！</p>
+                <p>ご協力いただきありがとうございます</p>
                 <p class="small">またのご来店をお待ちしております</p>
             </div>
         </section>
 
         <!-- Toast Notification -->
-        <div class="toast" id="toast">
-            <span class="toast-icon">✓</span>
+        <div class="toast" id="toast" role="alert" aria-live="assertive">
+            <span class="toast-icon" aria-hidden="true">✓</span>
             <span class="toast-message">コピーしました</span>
         </div>
     </div>
