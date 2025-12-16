@@ -85,7 +85,58 @@ function setupSheet() {
 }
 
 /**
- * POSTリクエストを処理
+ * GETリクエストを処理（JSONP対応 - CORS回避）
+ * @param {Object} e - リクエストオブジェクト
+ * @returns {ContentService.TextOutput} - レスポンス
+ */
+function doGet(e) {
+  try {
+    const callback = e.parameter.callback || 'callback';
+    const action = e.parameter.action || 'status';
+
+    let result;
+
+    switch (action) {
+      case 'generate':
+        // AI口コミ生成
+        const data = {
+          menu: e.parameter.menu || '',
+          overall: parseInt(e.parameter.overall) || 3,
+          quality: parseInt(e.parameter.quality) || 3,
+          service: parseInt(e.parameter.service) || 3,
+          atmosphere: parseInt(e.parameter.atmosphere) || 3,
+          value: parseInt(e.parameter.value) || 3
+        };
+        result = generateReviewWithAI(data);
+        break;
+      case 'status':
+      default:
+        result = {
+          status: 'ok',
+          message: 'KATEstageLASH Review System API is running',
+          version: '2.1'
+        };
+        break;
+    }
+
+    // JSONP形式でレスポンス
+    const jsonp = callback + '(' + JSON.stringify(result) + ')';
+    return ContentService.createTextOutput(jsonp)
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+
+  } catch (error) {
+    const callback = (e && e.parameter && e.parameter.callback) || 'callback';
+    const errorResponse = callback + '(' + JSON.stringify({
+      status: 'error',
+      message: error.toString()
+    }) + ')';
+    return ContentService.createTextOutput(errorResponse)
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+}
+
+/**
+ * POSTリクエストを処理（データ保存用）
  * @param {Object} e - リクエストオブジェクト
  * @returns {ContentService.TextOutput} - レスポンス
  */
@@ -94,22 +145,8 @@ function doPost(e) {
     // リクエストデータをパース
     const data = JSON.parse(e.postData.contents);
 
-    // アクションに応じて処理を分岐
-    const action = data.action || 'save';
-
-    let result;
-
-    switch (action) {
-      case 'generate':
-        // AI口コミ生成
-        result = generateReviewWithAI(data);
-        break;
-      case 'save':
-      default:
-        // データ保存
-        result = saveReviewData(data);
-        break;
-    }
+    // データ保存
+    const result = saveReviewData(data);
 
     // 成功レスポンス
     return ContentService.createTextOutput(JSON.stringify(result))
@@ -123,18 +160,6 @@ function doPost(e) {
       message: error.toString()
     })).setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-/**
- * GETリクエストを処理（テスト用）
- */
-function doGet(e) {
-  // CORSプリフライト対応
-  return ContentService.createTextOutput(JSON.stringify({
-    status: 'ok',
-    message: 'KATEstageLASH Review System API is running',
-    version: '2.0'
-  })).setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
