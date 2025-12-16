@@ -12,7 +12,7 @@ const CONFIG = {
     OPENAI_API_KEY: '',
 
     // Google Apps Script Web App URL (スプレッドシート連携用)
-    SPREADSHEET_URL: 'https://script.google.com/macros/s/AKfycbz6-q1ovAP1rfa7h4SIlVbel2n7KcpvxTisjyBdXS7f69sQfYfsK52sKM1fzEzVtznZgA/exec',
+    SPREADSHEET_URL: 'https://script.google.com/macros/s/AKfycbzJd0_cZYDFyY9BhPkyvGiYyTbIlNnS2XaBLGd-HhZLMZss_sjchl7SgZYNMsE-IhTC/exec',
 
     // Google Review URL
     GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
