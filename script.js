@@ -319,7 +319,7 @@ function updateCharCount() {
 }
 
 // =====================================================
-// Review Generation (GAS経由でAI生成)
+// Review Generation (GAS経由でAI生成 - JSONP方式)
 // =====================================================
 
 async function generateReview() {
@@ -331,7 +331,7 @@ async function generateReview() {
     try {
         let review;
 
-        // GAS経由でAI生成を試みる
+        // GAS経由でAI生成を試みる（JSONP方式）
         if (CONFIG.GAS_URL) {
             review = await generateReviewWithGAS();
         } else {
@@ -372,39 +372,62 @@ async function generateReview() {
 }
 
 /**
- * GAS経由でAI口コミを生成
+ * GAS経由でAI口コミを生成（JSONP方式 - CORS回避）
  */
-async function generateReviewWithGAS() {
-    const data = {
-        action: 'generate',
-        menu: state.selectedMenu,
-        overall: state.ratings.overall,
-        quality: state.ratings.quality,
-        service: state.ratings.service,
-        atmosphere: state.ratings.atmosphere,
-        value: state.ratings.value
-    };
+function generateReviewWithGAS() {
+    return new Promise((resolve, reject) => {
+        // タイムアウト設定（15秒）
+        const timeout = setTimeout(() => {
+            cleanup();
+            reject(new Error('Request timeout'));
+        }, 15000);
 
-    const response = await fetch(CONFIG.GAS_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data),
-        mode: 'cors'
+        // コールバック関数名を生成
+        const callbackName = 'gasCallback_' + Date.now();
+
+        // クリーンアップ関数
+        const cleanup = () => {
+            clearTimeout(timeout);
+            delete window[callbackName];
+            const script = document.getElementById(callbackName);
+            if (script) {
+                document.body.removeChild(script);
+            }
+        };
+
+        // グローバルコールバック関数を設定
+        window[callbackName] = (data) => {
+            cleanup();
+            if (data && data.status === 'success' && data.review) {
+                resolve(data.review);
+            } else {
+                reject(new Error('Invalid response from GAS'));
+            }
+        };
+
+        // URLパラメータを構築
+        const params = new URLSearchParams({
+            callback: callbackName,
+            action: 'generate',
+            menu: state.selectedMenu,
+            overall: state.ratings.overall,
+            quality: state.ratings.quality,
+            service: state.ratings.service,
+            atmosphere: state.ratings.atmosphere,
+            value: state.ratings.value
+        });
+
+        // scriptタグを作成してJSONPリクエスト
+        const script = document.createElement('script');
+        script.id = callbackName;
+        script.src = CONFIG.GAS_URL + '?' + params.toString();
+        script.onerror = () => {
+            cleanup();
+            reject(new Error('Script load failed'));
+        };
+
+        document.body.appendChild(script);
     });
-
-    if (!response.ok) {
-        throw new Error('GAS request failed');
-    }
-
-    const result = await response.json();
-
-    if (result.status === 'success' && result.review) {
-        return result.review;
-    }
-
-    throw new Error('Invalid response from GAS');
 }
 
 /**
@@ -471,7 +494,7 @@ function showToast(message) {
 }
 
 // =====================================================
-// Spreadsheet Integration
+// Spreadsheet Integration (no-cors mode)
 // =====================================================
 
 async function saveToSpreadsheet() {
@@ -481,7 +504,6 @@ async function saveToSpreadsheet() {
     }
 
     const data = {
-        action: 'save',
         timestamp: new Date().toISOString(),
         menu: state.selectedMenu,
         overallRating: state.ratings.overall,
@@ -493,16 +515,17 @@ async function saveToSpreadsheet() {
     };
 
     try {
+        // no-corsモードで送信（レスポンスは読めないが、保存は機能する）
         await fetch(CONFIG.GAS_URL, {
             method: 'POST',
+            mode: 'no-cors',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data),
-            mode: 'cors'
+            body: JSON.stringify(data)
         });
 
-        console.log('Data saved to spreadsheet');
+        console.log('Data sent to spreadsheet');
     } catch (error) {
         console.error('Failed to save to spreadsheet:', error);
     }
