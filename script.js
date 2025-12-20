@@ -398,7 +398,12 @@ function generateReviewWithGAS() {
         // グローバルコールバック関数を設定
         window[callbackName] = (data) => {
             cleanup();
+            console.log('GAS Response:', data);
+            if (data && data.debug) {
+                console.log('Debug info:', data.debug);
+            }
             if (data && data.status === 'success' && data.review) {
+                console.log('Review source:', data.source);
                 resolve(data.review);
             } else {
                 reject(new Error('Invalid response from GAS'));

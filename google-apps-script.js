@@ -172,60 +172,84 @@ function generateReviewWithAI(data) {
   const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
 
   if (!apiKey) {
+    Logger.log('GEMINI_API_KEY is not set in script properties');
     // APIキーが設定されていない場合はテンプレートを使用
     return {
       status: 'success',
       review: generateReviewFromTemplate(data),
-      source: 'template'
+      source: 'template',
+      debug: 'API key not configured'
     };
   }
 
   try {
     const prompt = createReviewPrompt(data);
+    Logger.log('Generated prompt length: ' + prompt.length);
 
     // Gemini 2.5 Flash API エンドポイント
     const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
+
+    const payload = {
+      contents: [
+        {
+          parts: [
+            {
+              text: prompt
+            }
+          ]
+        }
+      ],
+      generationConfig: {
+        temperature: 1.0,
+        maxOutputTokens: 500,
+        topP: 0.95,
+        topK: 40
+      }
+    };
+
+    Logger.log('Calling Gemini API...');
 
     const response = UrlFetchApp.fetch(url, {
       method: 'post',
       headers: {
         'Content-Type': 'application/json'
       },
-      payload: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt
-              }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 1.0,
-          maxOutputTokens: 500,
-          topP: 0.95,
-          topK: 40
-        }
-      }),
+      payload: JSON.stringify(payload),
       muteHttpExceptions: true
     });
 
     const responseCode = response.getResponseCode();
     const responseText = response.getContentText();
 
+    Logger.log('Gemini API Response Code: ' + responseCode);
+
     if (responseCode !== 200) {
-      Logger.log('Gemini API Error: ' + responseText);
+      Logger.log('Gemini API Error Response: ' + responseText);
       // エラー時はテンプレートにフォールバック
       return {
         status: 'success',
         review: generateReviewFromTemplate(data),
-        source: 'template'
+        source: 'template',
+        debug: 'API error: ' + responseCode
       };
     }
 
     const result = JSON.parse(responseText);
+    Logger.log('Gemini API Response parsed successfully');
+
+    // レスポンス構造を確認
+    if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
+      Logger.log('Unexpected response structure: ' + responseText);
+      return {
+        status: 'success',
+        review: generateReviewFromTemplate(data),
+        source: 'template',
+        debug: 'Invalid response structure'
+      };
+    }
+
     const review = result.candidates[0].content.parts[0].text.trim();
+    Logger.log('AI generated review length: ' + review.length);
 
     return {
       status: 'success',
@@ -239,7 +263,8 @@ function generateReviewWithAI(data) {
     return {
       status: 'success',
       review: generateReviewFromTemplate(data),
-      source: 'template'
+      source: 'template',
+      debug: 'Exception: ' + error.toString()
     };
   }
 }
