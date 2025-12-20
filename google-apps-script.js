@@ -200,10 +200,9 @@ function generateReviewWithAI(data) {
         }
       ],
       generationConfig: {
-        temperature: 1.0,
-        maxOutputTokens: 500,
-        topP: 0.95,
-        topK: 40
+        temperature: 0.9,
+        maxOutputTokens: 1024,
+        topP: 0.95
       }
     };
 
@@ -236,6 +235,7 @@ function generateReviewWithAI(data) {
 
     const result = JSON.parse(responseText);
     Logger.log('Gemini API Response parsed successfully');
+    Logger.log('Full response: ' + responseText.substring(0, 2000));
 
     // レスポンス構造を確認
     if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
@@ -248,8 +248,21 @@ function generateReviewWithAI(data) {
       };
     }
 
-    const review = result.candidates[0].content.parts[0].text.trim();
+    // Gemini 2.5 Flashは複数のpartsを返す可能性がある（thinking含む）
+    const parts = result.candidates[0].content.parts;
+    Logger.log('Number of parts: ' + parts.length);
+
+    // 最後のpartがテキスト出力（thinkingがある場合は最初のpartがthinking）
+    let review = '';
+    for (let i = 0; i < parts.length; i++) {
+      Logger.log('Part ' + i + ': ' + JSON.stringify(parts[i]).substring(0, 200));
+      if (parts[i].text) {
+        review = parts[i].text.trim();
+      }
+    }
+
     Logger.log('AI generated review length: ' + review.length);
+    Logger.log('AI generated review: ' + review);
 
     return {
       status: 'success',
