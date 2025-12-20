@@ -275,7 +275,14 @@ function generateReviewWithAI(data) {
  * @returns {string} - プロンプト
  */
 function createReviewPrompt(data) {
-  const { menu, overall, quality, service, atmosphere, value } = data;
+  // データが未定義の場合のデフォルト値
+  const safeData = data || {};
+  const menu = safeData.menu || '施術';
+  const overall = safeData.overall || 3;
+  const quality = safeData.quality || overall;
+  const service = safeData.service || overall;
+  const atmosphere = safeData.atmosphere || overall;
+  const value = safeData.value || overall;
 
   // 評価に応じたトーン設定
   let tone = '';
@@ -349,8 +356,9 @@ function createReviewPrompt(data) {
  * @returns {string} - 生成された口コミ
  */
 function generateReviewFromTemplate(data) {
-  const rating = data.overall || 3;
-  const menu = data.menu || '施術';
+  const safeData = data || {};
+  const rating = safeData.overall || 3;
+  const menu = safeData.menu || '施術';
 
   const templates = {
     5: [
