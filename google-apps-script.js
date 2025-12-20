@@ -9,11 +9,11 @@
  * 1. Google Spreadsheetを新規作成
  * 2. 「拡張機能」→「Apps Script」を開く
  * 3. このコードを全てコピーしてCode.gsに貼り付け
- * 4. OpenAI APIキーを設定:
+ * 4. Gemini APIキーを設定:
  *    - 左メニュー「プロジェクトの設定」→「スクリプト プロパティ」
  *    - 「スクリプト プロパティを追加」をクリック
- *    - プロパティ名: OPENAI_API_KEY
- *    - 値: sk-xxxx（あなたのAPIキー）
+ *    - プロパティ名: GEMINI_API_KEY
+ *    - 値: あなたのGemini APIキー（Google AI Studioで取得）
  * 5. 「デプロイ」→「新しいデプロイ」をクリック
  * 6. 「種類の選択」で「ウェブアプリ」を選択
  * 7. 設定：
@@ -163,13 +163,13 @@ function doPost(e) {
 }
 
 /**
- * OpenAI APIを使用して口コミを生成
+ * Gemini 2.5 Flash APIを使用して口コミを生成
  * @param {Object} data - 評価データ
  * @returns {Object} - 生成結果
  */
 function generateReviewWithAI(data) {
   // スクリプトプロパティからAPIキーを取得
-  const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
 
   if (!apiKey) {
     // APIキーが設定されていない場合はテンプレートを使用
@@ -183,35 +183,30 @@ function generateReviewWithAI(data) {
   try {
     const prompt = createReviewPrompt(data);
 
-    const response = UrlFetchApp.fetch('https://api.openai.com/v1/chat/completions', {
+    // Gemini 2.5 Flash API エンドポイント
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
+
+    const response = UrlFetchApp.fetch(url, {
       method: 'post',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey
+        'Content-Type': 'application/json'
       },
       payload: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
+        contents: [
           {
-            role: 'system',
-            content: `あなたは美容サロンの口コミを作成するアシスタントです。
-お客様の満足度に基づいて、自然で具体的な口コミを生成してください。
-
-【ルール】
-- 日本語で100〜200文字程度
-- 絵文字は使用しない
-- 丁寧な言葉遣いで書く
-- 実際に体験したかのような具体的な表現を使う
-- サロン名は含めない
-- 評価に応じたトーンで書く（高評価は積極的に、低評価は控えめに）`
-          },
-          {
-            role: 'user',
-            content: prompt
+            parts: [
+              {
+                text: prompt
+              }
+            ]
           }
         ],
-        max_tokens: 300,
-        temperature: 0.8
+        generationConfig: {
+          temperature: 1.0,
+          maxOutputTokens: 500,
+          topP: 0.95,
+          topK: 40
+        }
       }),
       muteHttpExceptions: true
     });
@@ -220,7 +215,7 @@ function generateReviewWithAI(data) {
     const responseText = response.getContentText();
 
     if (responseCode !== 200) {
-      Logger.log('OpenAI API Error: ' + responseText);
+      Logger.log('Gemini API Error: ' + responseText);
       // エラー時はテンプレートにフォールバック
       return {
         status: 'success',
@@ -230,7 +225,7 @@ function generateReviewWithAI(data) {
     }
 
     const result = JSON.parse(responseText);
-    const review = result.choices[0].message.content.trim();
+    const review = result.candidates[0].content.parts[0].text.trim();
 
     return {
       status: 'success',
@@ -250,13 +245,14 @@ function generateReviewWithAI(data) {
 }
 
 /**
- * AIプロンプトを作成
+ * AIプロンプトを作成（SEO対策ワード含む、様々な文体対応）
  * @param {Object} data - 評価データ
  * @returns {string} - プロンプト
  */
 function createReviewPrompt(data) {
   const { menu, overall, quality, service, atmosphere, value } = data;
 
+  // 評価に応じたトーン設定
   let tone = '';
   if (overall >= 5) {
     tone = '大変満足した体験として、積極的に褒める内容';
@@ -268,7 +264,29 @@ function createReviewPrompt(data) {
     tone = '改善を期待する控えめな内容';
   }
 
-  return `以下の評価に基づいて、眉毛まつ毛サロンの口コミを作成してください。
+  // 文体のバリエーション
+  const writingStyles = [
+    '丁寧で礼儀正しい敬語調（「〜でした」「〜いただきました」）',
+    'カジュアルでフレンドリーな口調（「〜だった」「〜してくれた」）',
+    '熱烈で感動を込めた表現（「本当に」「すごく」などの強調）',
+    '冷静で客観的な評価スタイル（事実を淡々と述べる）',
+    '親しみやすい話し言葉調（「〜なんです」「〜ですよね」）',
+    '簡潔でシンプルな表現（短文中心）',
+    '詳細で説明的な文体（具体的な描写を含む）'
+  ];
+  const randomStyle = writingStyles[Math.floor(Math.random() * writingStyles.length)];
+
+  // 文字数のバリエーション（100〜300文字）
+  const charRanges = [
+    { min: 100, max: 150, desc: '100〜150文字程度（簡潔に）' },
+    { min: 150, max: 200, desc: '150〜200文字程度（標準的）' },
+    { min: 200, max: 250, desc: '200〜250文字程度（やや詳しく）' },
+    { min: 250, max: 300, desc: '250〜300文字程度（詳細に）' }
+  ];
+  const randomCharRange = charRanges[Math.floor(Math.random() * charRanges.length)];
+
+  return `あなたは眉毛まつ毛サロンに通う一般のお客様です。
+以下の評価に基づいて、Googleマップに投稿する口コミを作成してください。
 
 【施術メニュー】${menu}
 
@@ -279,9 +297,25 @@ function createReviewPrompt(data) {
 - 店内の雰囲気: ${atmosphere}点/5点
 - 価格・コスパ: ${value}点/5点
 
-【トーン】${tone}
+【口コミのトーン】${tone}
 
-自然な口コミを1つだけ生成してください。`;
+【今回の文体】${randomStyle}
+
+【文字数】${randomCharRange.desc}
+
+【重要なルール】
+1. 必ず以下のSEOキーワードのうち1〜3個を自然に含めてください：
+   - 眉毛関連: 眉毛、まゆ毛、アイブロウ、眉毛サロン、眉毛スタイリング、眉デザイン
+   - まつ毛関連: まつ毛、まつげ、まつ毛パーマ、まつげパーマ、パリジェンヌ、ラッシュリフト、まつ毛サロン
+   - 施術関連: 仕上がり、デザイン、施術、カウンセリング、技術
+
+2. 絵文字は使用しないでください
+3. サロン名は含めないでください
+4. 実際に体験したかのような具体的で自然な表現を使ってください
+5. 他の口コミとは異なる独自の視点や表現を心がけてください
+6. 口コミ本文のみを出力してください（説明や前置きは不要）
+
+口コミを1つだけ生成してください：`;
 }
 
 /**
