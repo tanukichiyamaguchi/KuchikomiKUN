@@ -1030,3 +1030,121 @@ body {
         box-shadow: none;
     }
 }
+
+/* =====================================================
+   Selection Buttons - Good Points / Issues
+   ===================================================== */
+
+.section-subtitle {
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+    text-align: center;
+    margin-top: calc(-1 * var(--space-md));
+    margin-bottom: var(--space-xl);
+}
+
+.selection-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.select-btn {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.875rem;
+    font-family: var(--font-primary);
+    color: var(--gray-700);
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.select-btn:hover {
+    border-color: var(--gold-light);
+    background: var(--gold-subtle);
+}
+
+.select-btn.selected {
+    background: var(--gold-primary);
+    color: var(--white);
+    border-color: var(--gold-primary);
+}
+
+.select-btn.selected:hover {
+    background: var(--gold-dark);
+    border-color: var(--gold-dark);
+}
+
+/* Single select mode */
+.selection-buttons.single-select .select-btn.selected {
+    background: var(--gray-800);
+    border-color: var(--gray-800);
+}
+
+/* =====================================================
+   Feedback Section - Low Rating
+   ===================================================== */
+
+.feedback-notice {
+    background: var(--gold-lighter);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+    border-left: 3px solid var(--gold-primary);
+}
+
+.notice-text {
+    font-size: 0.8125rem;
+    color: var(--gray-700);
+    line-height: 1.8;
+    margin-bottom: var(--space-sm);
+}
+
+.notice-text:last-child {
+    margin-bottom: 0;
+}
+
+.notice-text strong {
+    color: var(--gold-dark);
+}
+
+.notice-highlight {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    font-style: italic;
+}
+
+.required {
+    color: var(--error);
+    font-size: 0.6875rem;
+    margin-left: var(--space-xs);
+    font-weight: 500;
+}
+
+/* =====================================================
+   Free Review Section - Low Rating
+   ===================================================== */
+
+.free-review-notice {
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    text-align: center;
+}
+
+.free-review-notice p {
+    font-size: 0.875rem;
+    color: var(--gray-700);
+    margin-bottom: var(--space-sm);
+}
+
+.free-review-notice .notice-small {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-bottom: 0;
+}

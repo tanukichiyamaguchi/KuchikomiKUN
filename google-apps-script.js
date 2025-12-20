@@ -105,7 +105,8 @@ function doGet(e) {
           quality: parseInt(e.parameter.quality) || 3,
           service: parseInt(e.parameter.service) || 3,
           atmosphere: parseInt(e.parameter.atmosphere) || 3,
-          value: parseInt(e.parameter.value) || 3
+          value: parseInt(e.parameter.value) || 3,
+          goodPoints: e.parameter.goodPoints || ''
         };
         result = generateReviewWithAI(data);
         break;
@@ -296,6 +297,7 @@ function createReviewPrompt(data) {
   const service = safeData.service || overall;
   const atmosphere = safeData.atmosphere || overall;
   const value = safeData.value || overall;
+  const goodPoints = safeData.goodPoints || '';
 
   // 評価に応じたトーン設定
   let tone = '';
@@ -330,6 +332,16 @@ function createReviewPrompt(data) {
   ];
   const randomCharRange = charRanges[Math.floor(Math.random() * charRanges.length)];
 
+  // 良かったポイントのセクション
+  let goodPointsSection = '';
+  if (goodPoints) {
+    goodPointsSection = `
+【お客様が良かったと感じた点】
+${goodPoints.split(',').map(p => '- ' + p.trim()).join('\n')}
+
+これらの良かった点を口コミに自然に盛り込んでください。`;
+  }
+
   return `あなたは眉毛まつ毛サロンに通う一般のお客様です。
 以下の評価に基づいて、Googleマップに投稿する口コミを作成してください。
 
@@ -341,6 +353,7 @@ function createReviewPrompt(data) {
 - 接客・カウンセリング: ${service}点/5点
 - 店内の雰囲気: ${atmosphere}点/5点
 - 価格・コスパ: ${value}点/5点
+${goodPointsSection}
 
 【口コミのトーン】${tone}
 

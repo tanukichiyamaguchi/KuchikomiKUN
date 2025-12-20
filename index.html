@@ -33,8 +33,9 @@
             </div>
             <div class="progress-steps">
                 <span class="step active" data-step="1">評価</span>
-                <span class="step" data-step="2">口コミ</span>
-                <span class="step" data-step="3">投稿</span>
+                <span class="step" data-step="2">詳細</span>
+                <span class="step" data-step="3">口コミ</span>
+                <span class="step" data-step="4">投稿</span>
             </div>
         </nav>
 
@@ -140,19 +141,134 @@
             </div>
 
             <button class="btn btn-primary" id="nextToStep2" disabled aria-describedby="step1-next-hint">
-                口コミを作成する
+                次へ進む
                 <span class="btn-arrow" aria-hidden="true">→</span>
             </button>
             <span id="step1-next-hint" hidden>評価を入力すると次へ進めます</span>
         </section>
 
-        <!-- Step 2: Review Generation & Editing -->
+        <!-- Step 2: Good Points Selection (Rating 3+) / Feedback (Rating 2-) -->
         <section class="step-section" id="step2" aria-labelledby="step2-title">
-            <h2 class="section-title" id="step2-title">
+            <!-- 星3以上の場合 -->
+            <div id="goodPointsSection">
+                <h2 class="section-title" id="step2-title">
+                    良かった点を教えてください
+                </h2>
+                <p class="section-subtitle">該当するものを全て選択してください（複数選択可）</p>
+
+                <div class="selection-buttons" id="goodPointsButtons">
+                    <button type="button" class="select-btn" data-value="仕上がりがきれい">仕上がりがきれい</button>
+                    <button type="button" class="select-btn" data-value="技術が丁寧">技術が丁寧</button>
+                    <button type="button" class="select-btn" data-value="カウンセリングが良かった">カウンセリングが良かった</button>
+                    <button type="button" class="select-btn" data-value="スタッフの対応が良い">スタッフの対応が良い</button>
+                    <button type="button" class="select-btn" data-value="店内が清潔">店内が清潔</button>
+                    <button type="button" class="select-btn" data-value="リラックスできた">リラックスできた</button>
+                    <button type="button" class="select-btn" data-value="価格が適切">価格が適切</button>
+                    <button type="button" class="select-btn" data-value="説明がわかりやすかった">説明がわかりやすかった</button>
+                    <button type="button" class="select-btn" data-value="予約が取りやすい">予約が取りやすい</button>
+                    <button type="button" class="select-btn" data-value="施術時間がちょうど良い">施術時間がちょうど良い</button>
+                </div>
+            </div>
+
+            <!-- 星2以下の場合 -->
+            <div id="feedbackSection" style="display: none;">
+                <h2 class="section-title">
+                    貴重なご意見をお聞かせください
+                </h2>
+
+                <div class="feedback-notice">
+                    <p class="notice-text">
+                        いただいたご意見は、サービス向上のために活用させていただきます。<br>
+                        <strong>スタッフに直接伝わることはございません</strong>ので、率直なご意見をお聞かせください。
+                    </p>
+                    <p class="notice-text notice-highlight">
+                        内容によっては、オーナー自身がお客様にお電話させていただき、お詫びとご説明をさせていただく場合がございます。
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">良かった点（該当するものがあれば選択）</label>
+                    <div class="selection-buttons" id="goodPointsButtonsLow">
+                        <button type="button" class="select-btn" data-value="仕上がりがきれい">仕上がりがきれい</button>
+                        <button type="button" class="select-btn" data-value="技術が丁寧">技術が丁寧</button>
+                        <button type="button" class="select-btn" data-value="カウンセリングが良かった">カウンセリングが良かった</button>
+                        <button type="button" class="select-btn" data-value="スタッフの対応が良い">スタッフの対応が良い</button>
+                        <button type="button" class="select-btn" data-value="店内が清潔">店内が清潔</button>
+                        <button type="button" class="select-btn" data-value="リラックスできた">リラックスできた</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="dissatisfactionText">ご不満に感じた点を詳しくお聞かせください<span class="required">*必須</span></label>
+                    <textarea
+                        id="dissatisfactionText"
+                        class="review-textarea"
+                        placeholder="具体的にどの部分が期待と異なりましたか？できるだけ詳しくお書きください..."
+                        rows="4"
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="expectationText">どのような仕上がりを期待されていましたか？</label>
+                    <textarea
+                        id="expectationText"
+                        class="review-textarea"
+                        placeholder="理想のイメージや、事前に伝えた希望などがあればお書きください..."
+                        rows="3"
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="improvementText">今後どのような改善を希望されますか？</label>
+                    <textarea
+                        id="improvementText"
+                        class="review-textarea"
+                        placeholder="次回以降、どのように対応してほしいかなどをお書きください..."
+                        rows="3"
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">スタッフの対応で気になった点はありますか？</label>
+                    <div class="selection-buttons" id="staffIssueButtons">
+                        <button type="button" class="select-btn" data-value="特になし">特になし</button>
+                        <button type="button" class="select-btn" data-value="説明が不十分">説明が不十分</button>
+                        <button type="button" class="select-btn" data-value="対応が事務的">対応が事務的</button>
+                        <button type="button" class="select-btn" data-value="待ち時間が長かった">待ち時間が長かった</button>
+                        <button type="button" class="select-btn" data-value="希望が伝わらなかった">希望が伝わらなかった</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">再来店の可能性はありますか？</label>
+                    <div class="selection-buttons single-select" id="returnButtons">
+                        <button type="button" class="select-btn" data-value="改善されれば検討したい">改善されれば検討したい</button>
+                        <button type="button" class="select-btn" data-value="わからない">わからない</button>
+                        <button type="button" class="select-btn" data-value="難しい">難しい</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-outline" id="backToStep1FromStep2">
+                    <span class="btn-arrow" aria-hidden="true">←</span>
+                    戻る
+                </button>
+                <button class="btn btn-primary" id="nextToStep3" disabled>
+                    次へ進む
+                    <span class="btn-arrow" aria-hidden="true">→</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 3: Review Generation & Editing -->
+        <section class="step-section" id="step3" aria-labelledby="step3-title">
+            <h2 class="section-title" id="step3-title">
                 口コミを編集してください
             </h2>
 
-            <div class="review-generation">
+            <!-- 星3以上: AI生成 -->
+            <div class="review-generation" id="aiReviewSection">
                 <div class="ai-badge" aria-label="AI提案">
                     <span class="ai-icon" aria-hidden="true">◇</span>
                     AI提案の口コミ
@@ -183,21 +299,42 @@
                 </button>
             </div>
 
+            <!-- 星2以下: 自由記述 -->
+            <div class="review-generation" id="freeReviewSection" style="display: none;">
+                <div class="free-review-notice">
+                    <p>Googleマップに投稿する口コミをご自由にお書きください。</p>
+                    <p class="notice-small">※ 先ほどいただいたご意見は社内改善用として保存されます。Googleへの投稿内容はお客様ご自身でお決めいただけます。</p>
+                </div>
+
+                <div class="review-editor">
+                    <label for="freeReviewText" class="form-label">口コミ内容</label>
+                    <textarea
+                        id="freeReviewText"
+                        class="review-textarea"
+                        placeholder="率直なご感想をお書きください..."
+                        rows="6"
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="freeCharCount">0</span> / 500文字
+                    </div>
+                </div>
+            </div>
+
             <div class="button-group">
-                <button class="btn btn-outline" id="backToStep1">
+                <button class="btn btn-outline" id="backToStep2">
                     <span class="btn-arrow" aria-hidden="true">←</span>
                     戻る
                 </button>
-                <button class="btn btn-primary" id="nextToStep3" disabled>
+                <button class="btn btn-primary" id="nextToStep4" disabled>
                     投稿へ進む
                     <span class="btn-arrow" aria-hidden="true">→</span>
                 </button>
             </div>
         </section>
 
-        <!-- Step 3: Post to Google -->
-        <section class="step-section" id="step3" aria-labelledby="step3-title">
-            <h2 class="section-title" id="step3-title">
+        <!-- Step 4: Post to Google -->
+        <section class="step-section" id="step4" aria-labelledby="step4-title">
+            <h2 class="section-title" id="step4-title">
                 Google口コミに投稿
             </h2>
 
@@ -241,7 +378,7 @@
             </a>
 
             <div class="button-group">
-                <button class="btn btn-outline" id="backToStep2">
+                <button class="btn btn-outline" id="backToStep3">
                     <span class="btn-arrow" aria-hidden="true">←</span>
                     戻る
                 </button>
