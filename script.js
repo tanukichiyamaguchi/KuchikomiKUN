@@ -249,9 +249,6 @@ function setHeroRating(value, container) {
         elements.overallText.textContent = ratingTexts[value];
     }
 
-    // Auto-fill detailed ratings if not set
-    autoFillDetailedRatings(value);
-
     validateStep1();
 }
 
@@ -366,43 +363,6 @@ function resetDotHighlight(container, currentValue) {
         if (!dot.classList.contains('active') && !dot.classList.contains('filled')) {
             dot.style.borderColor = '';
             dot.style.background = '';
-        }
-    });
-}
-
-/**
- * Auto-fill detailed ratings based on overall rating
- */
-function autoFillDetailedRatings(overallValue) {
-    const categories = ['quality', 'service', 'atmosphere', 'value'];
-
-    categories.forEach(category => {
-        if (state.ratings[category] === 0) {
-            state.ratings[category] = overallValue;
-
-            // Update UI
-            const container = document.querySelector(`.rating-list-item[data-category="${category}"]`);
-            if (container) {
-                const dots = container.querySelectorAll('.rating-dot');
-                dots.forEach(dot => {
-                    const dotValue = parseInt(dot.dataset.value);
-                    dot.classList.remove('active', 'filled');
-
-                    if (dotValue === overallValue) {
-                        dot.classList.add('active');
-                    } else if (dotValue < overallValue) {
-                        dot.classList.add('filled');
-                    }
-                });
-
-                // Update value display
-                const valueDisplay = document.getElementById(`${category}Value`);
-                if (valueDisplay) {
-                    valueDisplay.textContent = overallValue;
-                }
-
-                container.classList.add('rated');
-            }
         }
     });
 }
@@ -690,7 +650,14 @@ function updateProgress() {
 // =====================================================
 
 function validateStep1() {
-    const isValid = state.ratings.overall > 0 && state.selectedMenu !== '';
+    const allRatingsSet =
+        state.ratings.overall > 0 &&
+        state.ratings.quality > 0 &&
+        state.ratings.service > 0 &&
+        state.ratings.atmosphere > 0 &&
+        state.ratings.value > 0;
+
+    const isValid = allRatingsSet && state.selectedMenu !== '';
     elements.nextToStep2.disabled = !isValid;
 }
 
