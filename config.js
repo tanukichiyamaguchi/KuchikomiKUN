@@ -10,7 +10,11 @@ window.CONFIG = {
     // GASをデプロイ後、ここにURLを設定してください
     GAS_URL: 'https://script.google.com/macros/s/AKfycbxCtRB9pp4mf-wMLqrJFnAoCxAcO48AYvg4MoKxtDUKNKcUj2KBDMEpQ2LgnlikA976aQ/exec',
 
-    // Google Review URL
+    // Hot Pepper Beauty Review URL (Primary)
+    // サロンのHot Pepper Beauty口コミ投稿ページURLを設定してください
+    HOTPEPPER_REVIEW_URL: '',
+
+    // Google Review URL (Secondary)
     GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
 
     // Salon Info

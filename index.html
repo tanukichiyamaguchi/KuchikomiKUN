@@ -77,64 +77,93 @@
                 </select>
             </div>
 
-            <!-- Rating Categories -->
-            <div class="rating-categories">
-                <!-- Overall Satisfaction -->
-                <div class="rating-card main-rating">
-                    <label class="rating-label" id="overall-label">総合満足度</label>
-                    <div class="star-rating" data-category="overall" role="radiogroup" aria-labelledby="overall-label">
-                        <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
-                        <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
-                        <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
-                        <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
-                        <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+            <!-- Rating Categories - Mobile Optimized -->
+            <div class="rating-categories-mobile">
+                <!-- Overall Satisfaction - Hero Rating -->
+                <div class="rating-hero">
+                    <label class="rating-hero-label" id="overall-label">総合満足度</label>
+                    <div class="star-rating-hero" data-category="overall" role="radiogroup" aria-labelledby="overall-label">
+                        <button type="button" class="star-btn" data-value="1" role="radio" aria-checked="false">
+                            <span class="star-icon">★</span>
+                            <span class="star-label">1</span>
+                        </button>
+                        <button type="button" class="star-btn" data-value="2" role="radio" aria-checked="false">
+                            <span class="star-icon">★</span>
+                            <span class="star-label">2</span>
+                        </button>
+                        <button type="button" class="star-btn" data-value="3" role="radio" aria-checked="false">
+                            <span class="star-icon">★</span>
+                            <span class="star-label">3</span>
+                        </button>
+                        <button type="button" class="star-btn" data-value="4" role="radio" aria-checked="false">
+                            <span class="star-icon">★</span>
+                            <span class="star-label">4</span>
+                        </button>
+                        <button type="button" class="star-btn" data-value="5" role="radio" aria-checked="false">
+                            <span class="star-icon">★</span>
+                            <span class="star-label">5</span>
+                        </button>
                     </div>
-                    <span class="rating-text" id="overallText">タップして評価</span>
+                    <div class="rating-feedback" id="overallFeedback">
+                        <span class="feedback-text" id="overallText">タップして評価してください</span>
+                    </div>
                 </div>
 
-                <!-- Detailed Ratings -->
-                <div class="detailed-ratings">
-                    <div class="rating-card">
-                        <label class="rating-label" id="quality-label">施術の仕上がり</label>
-                        <div class="star-rating small" data-category="quality" role="radiogroup" aria-labelledby="quality-label">
-                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                <!-- Detailed Ratings - Compact List -->
+                <div class="rating-list">
+                    <div class="rating-list-item" data-category="quality">
+                        <div class="rating-list-header">
+                            <span class="rating-list-label">施術の仕上がり</span>
+                            <span class="rating-list-value" id="qualityValue">-</span>
+                        </div>
+                        <div class="rating-slider-track">
+                            <button type="button" class="rating-dot" data-value="1" aria-label="1点"></button>
+                            <button type="button" class="rating-dot" data-value="2" aria-label="2点"></button>
+                            <button type="button" class="rating-dot" data-value="3" aria-label="3点"></button>
+                            <button type="button" class="rating-dot" data-value="4" aria-label="4点"></button>
+                            <button type="button" class="rating-dot" data-value="5" aria-label="5点"></button>
                         </div>
                     </div>
 
-                    <div class="rating-card">
-                        <label class="rating-label" id="service-label">接客・カウンセリング</label>
-                        <div class="star-rating small" data-category="service" role="radiogroup" aria-labelledby="service-label">
-                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                    <div class="rating-list-item" data-category="service">
+                        <div class="rating-list-header">
+                            <span class="rating-list-label">接客・カウンセリング</span>
+                            <span class="rating-list-value" id="serviceValue">-</span>
+                        </div>
+                        <div class="rating-slider-track">
+                            <button type="button" class="rating-dot" data-value="1" aria-label="1点"></button>
+                            <button type="button" class="rating-dot" data-value="2" aria-label="2点"></button>
+                            <button type="button" class="rating-dot" data-value="3" aria-label="3点"></button>
+                            <button type="button" class="rating-dot" data-value="4" aria-label="4点"></button>
+                            <button type="button" class="rating-dot" data-value="5" aria-label="5点"></button>
                         </div>
                     </div>
 
-                    <div class="rating-card">
-                        <label class="rating-label" id="atmosphere-label">店内の雰囲気</label>
-                        <div class="star-rating small" data-category="atmosphere" role="radiogroup" aria-labelledby="atmosphere-label">
-                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                    <div class="rating-list-item" data-category="atmosphere">
+                        <div class="rating-list-header">
+                            <span class="rating-list-label">店内の雰囲気</span>
+                            <span class="rating-list-value" id="atmosphereValue">-</span>
+                        </div>
+                        <div class="rating-slider-track">
+                            <button type="button" class="rating-dot" data-value="1" aria-label="1点"></button>
+                            <button type="button" class="rating-dot" data-value="2" aria-label="2点"></button>
+                            <button type="button" class="rating-dot" data-value="3" aria-label="3点"></button>
+                            <button type="button" class="rating-dot" data-value="4" aria-label="4点"></button>
+                            <button type="button" class="rating-dot" data-value="5" aria-label="5点"></button>
                         </div>
                     </div>
 
-                    <div class="rating-card">
-                        <label class="rating-label" id="value-label">価格・コスパ</label>
-                        <div class="star-rating small" data-category="value" role="radiogroup" aria-labelledby="value-label">
-                            <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
-                            <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                    <div class="rating-list-item" data-category="value">
+                        <div class="rating-list-header">
+                            <span class="rating-list-label">価格・コスパ</span>
+                            <span class="rating-list-value" id="valueValue">-</span>
+                        </div>
+                        <div class="rating-slider-track">
+                            <button type="button" class="rating-dot" data-value="1" aria-label="1点"></button>
+                            <button type="button" class="rating-dot" data-value="2" aria-label="2点"></button>
+                            <button type="button" class="rating-dot" data-value="3" aria-label="3点"></button>
+                            <button type="button" class="rating-dot" data-value="4" aria-label="4点"></button>
+                            <button type="button" class="rating-dot" data-value="5" aria-label="5点"></button>
                         </div>
                     </div>
                 </div>
@@ -333,10 +362,10 @@
             </div>
         </section>
 
-        <!-- Step 4: Post to Google -->
+        <!-- Step 4: Post Reviews -->
         <section class="step-section" id="step4" aria-labelledby="step4-title">
             <h2 class="section-title" id="step4-title">
-                Google口コミに投稿
+                口コミを投稿
             </h2>
 
             <div class="review-preview">
@@ -349,34 +378,61 @@
                 </div>
             </div>
 
-            <div class="google-instructions">
-                <h3 class="instructions-title">投稿手順</h3>
-                <ol class="instructions-list">
-                    <li>下のボタンをタップしてGoogleマップを開きます</li>
-                    <li>星の数を選択してください</li>
-                    <li>上の口コミ文をコピーして貼り付けてください</li>
-                    <li>「投稿」ボタンをタップして完了</li>
-                </ol>
-            </div>
-
             <button class="btn btn-copy" id="copyReviewBtn">
                 <span class="btn-icon" aria-hidden="true">⎘</span>
                 口コミをコピー
             </button>
 
-            <a href="https://g.page/r/CawIWPvYFL2vEBM/review"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="btn btn-google"
-               id="googleReviewBtn">
-                <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Googleで口コミを投稿
-            </a>
+            <!-- Hotpepper Beauty (Primary) -->
+            <div class="review-platform-section primary">
+                <div class="platform-header">
+                    <span class="platform-badge recommended">おすすめ</span>
+                    <h3 class="platform-title">Hot Pepper Beauty</h3>
+                </div>
+                <div class="platform-instructions">
+                    <ol class="instructions-list compact">
+                        <li>下のボタンをタップ</li>
+                        <li>ログインして口コミを投稿</li>
+                    </ol>
+                </div>
+                <a href="#"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="btn btn-hotpepper"
+                   id="hotpepperReviewBtn">
+                    <svg class="hotpepper-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" fill="#FF5722"/>
+                        <text x="12" y="16" text-anchor="middle" fill="white" font-size="10" font-weight="bold">HP</text>
+                    </svg>
+                    Hot Pepper Beautyで投稿
+                </a>
+            </div>
+
+            <!-- Google (Secondary) -->
+            <div class="review-platform-section secondary">
+                <div class="platform-header">
+                    <h3 class="platform-title">Google マップ</h3>
+                </div>
+                <div class="platform-instructions">
+                    <ol class="instructions-list compact">
+                        <li>ボタンをタップしてGoogleマップを開く</li>
+                        <li>星を選択し、口コミを貼り付け</li>
+                    </ol>
+                </div>
+                <a href="https://g.page/r/CawIWPvYFL2vEBM/review"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="btn btn-google"
+                   id="googleReviewBtn">
+                    <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Googleで口コミを投稿
+                </a>
+            </div>
 
             <div class="button-group">
                 <button class="btn btn-outline" id="backToStep3">

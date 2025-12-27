@@ -52,8 +52,15 @@ const elements = {
     menuSelect: document.getElementById('menuSelect'),
     overallText: document.getElementById('overallText'),
 
+    // Rating value displays
+    qualityValue: document.getElementById('qualityValue'),
+    serviceValue: document.getElementById('serviceValue'),
+    atmosphereValue: document.getElementById('atmosphereValue'),
+    valueValue: document.getElementById('valueValue'),
+
     // Step 1 buttons
     nextToStep2: document.getElementById('nextToStep2'),
+    hotpepperReviewBtn: document.getElementById('hotpepperReviewBtn'),
 
     // Step 2 elements
     goodPointsSection: document.getElementById('goodPointsSection'),
@@ -141,47 +148,262 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeStarRatings();
     initializeEventListeners();
     initializeSelectionButtons();
+    initializeReviewLinks();
     updateProgress();
 });
+
+/**
+ * Initialize review platform links from config
+ */
+function initializeReviewLinks() {
+    // Set Hotpepper URL from config
+    if (elements.hotpepperReviewBtn && CONFIG.HOTPEPPER_REVIEW_URL) {
+        elements.hotpepperReviewBtn.href = CONFIG.HOTPEPPER_REVIEW_URL;
+    }
+
+    // Set Google URL from config (if different from default)
+    if (elements.googleReviewBtn && CONFIG.GOOGLE_REVIEW_URL) {
+        elements.googleReviewBtn.href = CONFIG.GOOGLE_REVIEW_URL;
+    }
+}
 
 // =====================================================
 // Star Rating Functions
 // =====================================================
 
 function initializeStarRatings() {
-    const starRatings = document.querySelectorAll('.star-rating');
+    // Initialize Hero Rating (Overall)
+    initializeHeroRating();
 
-    starRatings.forEach(rating => {
+    // Initialize Rating List Items (Detailed Ratings)
+    initializeRatingListItems();
+
+    // Fallback for old-style star ratings (if any)
+    const oldStarRatings = document.querySelectorAll('.star-rating:not(.star-rating-hero)');
+    oldStarRatings.forEach(rating => {
         const stars = rating.querySelectorAll('.star');
         const category = rating.dataset.category;
 
         stars.forEach(star => {
-            // Touch/Click events
             star.addEventListener('click', (e) => {
                 e.preventDefault();
                 const value = parseInt(star.dataset.value);
                 setRating(category, value, rating);
             });
+        });
+    });
+}
 
-            // Keyboard support
-            star.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    const value = parseInt(star.dataset.value);
-                    setRating(category, value, rating);
-                }
+/**
+ * Initialize Hero Rating (Overall Satisfaction)
+ */
+function initializeHeroRating() {
+    const heroRating = document.querySelector('.star-rating-hero');
+    if (!heroRating) return;
+
+    const starBtns = heroRating.querySelectorAll('.star-btn');
+    const category = heroRating.dataset.category;
+
+    starBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const value = parseInt(btn.dataset.value);
+            setHeroRating(value, heroRating);
+        });
+
+        // Hover effects
+        btn.addEventListener('mouseenter', () => {
+            const value = parseInt(btn.dataset.value);
+            highlightHeroStars(heroRating, value);
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            resetHeroHighlight(heroRating, state.ratings[category]);
+        });
+    });
+}
+
+/**
+ * Set Hero Rating value
+ */
+function setHeroRating(value, container) {
+    state.ratings.overall = value;
+    state.isLowRating = value <= 2;
+
+    const starBtns = container.querySelectorAll('.star-btn');
+    starBtns.forEach((btn, index) => {
+        const btnValue = parseInt(btn.dataset.value);
+        btn.classList.remove('active', 'filled');
+
+        if (btnValue === value) {
+            btn.classList.add('active');
+        } else if (btnValue < value) {
+            btn.classList.add('filled');
+        }
+
+        btn.setAttribute('aria-checked', btnValue === value ? 'true' : 'false');
+    });
+
+    // Update feedback text
+    if (elements.overallText) {
+        elements.overallText.textContent = ratingTexts[value];
+    }
+
+    // Auto-fill detailed ratings if not set
+    autoFillDetailedRatings(value);
+
+    validateStep1();
+}
+
+/**
+ * Highlight hero stars on hover
+ */
+function highlightHeroStars(container, value) {
+    const starBtns = container.querySelectorAll('.star-btn');
+    starBtns.forEach(btn => {
+        const btnValue = parseInt(btn.dataset.value);
+        if (btnValue <= value) {
+            btn.style.opacity = '1';
+            btn.style.transform = 'scale(1.02)';
+        } else {
+            btn.style.opacity = '0.6';
+        }
+    });
+}
+
+/**
+ * Reset hero star highlight
+ */
+function resetHeroHighlight(container, currentValue) {
+    const starBtns = container.querySelectorAll('.star-btn');
+    starBtns.forEach(btn => {
+        btn.style.opacity = '';
+        btn.style.transform = '';
+    });
+}
+
+/**
+ * Initialize Rating List Items (Detailed Ratings with dots)
+ */
+function initializeRatingListItems() {
+    const ratingItems = document.querySelectorAll('.rating-list-item');
+
+    ratingItems.forEach(item => {
+        const category = item.dataset.category;
+        const dots = item.querySelectorAll('.rating-dot');
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                e.preventDefault();
+                const value = parseInt(dot.dataset.value);
+                setListItemRating(category, value, item);
             });
 
-            // Hover effects (desktop)
-            star.addEventListener('mouseenter', () => {
-                const value = parseInt(star.dataset.value);
-                highlightStars(rating, value);
+            // Hover effects
+            dot.addEventListener('mouseenter', () => {
+                const value = parseInt(dot.dataset.value);
+                highlightDots(item, value);
             });
 
-            star.addEventListener('mouseleave', () => {
-                resetStarHighlight(rating, state.ratings[category]);
+            dot.addEventListener('mouseleave', () => {
+                resetDotHighlight(item, state.ratings[category]);
             });
         });
+    });
+}
+
+/**
+ * Set rating for list item
+ */
+function setListItemRating(category, value, container) {
+    state.ratings[category] = value;
+
+    const dots = container.querySelectorAll('.rating-dot');
+    dots.forEach(dot => {
+        const dotValue = parseInt(dot.dataset.value);
+        dot.classList.remove('active', 'filled');
+
+        if (dotValue === value) {
+            dot.classList.add('active');
+        } else if (dotValue < value) {
+            dot.classList.add('filled');
+        }
+    });
+
+    // Update value display
+    const valueDisplay = document.getElementById(`${category}Value`);
+    if (valueDisplay) {
+        valueDisplay.textContent = value;
+    }
+
+    // Mark container as rated
+    container.classList.add('rated');
+
+    validateStep1();
+}
+
+/**
+ * Highlight dots on hover
+ */
+function highlightDots(container, value) {
+    const dots = container.querySelectorAll('.rating-dot');
+    dots.forEach(dot => {
+        const dotValue = parseInt(dot.dataset.value);
+        if (dotValue <= value) {
+            dot.style.borderColor = '#E8D48A';
+            dot.style.background = 'rgba(201, 162, 39, 0.08)';
+        }
+    });
+}
+
+/**
+ * Reset dot highlight
+ */
+function resetDotHighlight(container, currentValue) {
+    const dots = container.querySelectorAll('.rating-dot');
+    dots.forEach(dot => {
+        const dotValue = parseInt(dot.dataset.value);
+        if (!dot.classList.contains('active') && !dot.classList.contains('filled')) {
+            dot.style.borderColor = '';
+            dot.style.background = '';
+        }
+    });
+}
+
+/**
+ * Auto-fill detailed ratings based on overall rating
+ */
+function autoFillDetailedRatings(overallValue) {
+    const categories = ['quality', 'service', 'atmosphere', 'value'];
+
+    categories.forEach(category => {
+        if (state.ratings[category] === 0) {
+            state.ratings[category] = overallValue;
+
+            // Update UI
+            const container = document.querySelector(`.rating-list-item[data-category="${category}"]`);
+            if (container) {
+                const dots = container.querySelectorAll('.rating-dot');
+                dots.forEach(dot => {
+                    const dotValue = parseInt(dot.dataset.value);
+                    dot.classList.remove('active', 'filled');
+
+                    if (dotValue === overallValue) {
+                        dot.classList.add('active');
+                    } else if (dotValue < overallValue) {
+                        dot.classList.add('filled');
+                    }
+                });
+
+                // Update value display
+                const valueDisplay = document.getElementById(`${category}Value`);
+                if (valueDisplay) {
+                    valueDisplay.textContent = overallValue;
+                }
+
+                container.classList.add('rated');
+            }
+        }
     });
 }
 
@@ -366,6 +588,13 @@ function initializeEventListeners() {
     elements.googleReviewBtn.addEventListener('click', () => {
         saveToSpreadsheet();
     });
+
+    // Hotpepper Review button - save data before redirect
+    if (elements.hotpepperReviewBtn) {
+        elements.hotpepperReviewBtn.addEventListener('click', () => {
+            saveToSpreadsheet();
+        });
+    }
 }
 
 // =====================================================
