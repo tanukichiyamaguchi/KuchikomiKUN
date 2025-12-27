@@ -187,8 +187,8 @@ function generateReviewWithAI(data) {
     const prompt = createReviewPrompt(data);
     Logger.log('Generated prompt length: ' + prompt.length);
 
-    // Gemini 2.0 Flash API エンドポイント（thinking機能なしで安定）
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
+    // Gemini 2.5 Flash API エンドポイント
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
 
     const payload = {
       contents: [
@@ -202,9 +202,8 @@ function generateReviewWithAI(data) {
       ],
       generationConfig: {
         temperature: 0.9,
-        maxOutputTokens: 2048,
-        topP: 0.95,
-        stopSequences: []
+        maxOutputTokens: 8192,
+        topP: 0.95
       }
     };
 
@@ -301,50 +300,106 @@ function createReviewPrompt(data) {
   const goodPoints = safeData.goodPoints || '';
 
   // 評価に応じたトーン設定
-  let toneHint = '';
+  let tone = '';
   if (overall >= 5) {
-    toneHint = '満足度が高い';
+    tone = '大変満足した体験として、積極的に褒める内容';
   } else if (overall >= 4) {
-    toneHint = '概ね満足';
+    tone = '満足した体験として、良かった点を具体的に挙げる内容';
   } else if (overall >= 3) {
-    toneHint = '普通';
+    tone = '普通の体験として、淡々と感想を述べる内容';
   } else {
-    toneHint = '改善希望';
+    tone = '改善を期待する控えめな内容';
   }
 
-  // 文体のランダム選択
-  const styles = ['丁寧語', 'カジュアル', '短文中心', '詳しめ'];
-  const style = styles[Math.floor(Math.random() * styles.length)];
+  // 文体のバリエーション
+  const writingStyles = [
+    '丁寧で礼儀正しい敬語調（「〜でした」「〜いただきました」）',
+    'カジュアルでフレンドリーな口調（「〜だった」「〜してくれた」）',
+    '熱烈で感動を込めた表現（「本当に」「すごく」などの強調）',
+    '冷静で客観的な評価スタイル（事実を淡々と述べる）',
+    '親しみやすい話し言葉調（「〜なんです」「〜ですよね」）',
+    '簡潔でシンプルな表現（短文中心）',
+    '詳細で説明的な文体（具体的な描写を含む）'
+  ];
+  const randomStyle = writingStyles[Math.floor(Math.random() * writingStyles.length)];
 
-  // 文字数のランダム選択
-  const lengths = ['120〜180文字', '180〜250文字', '250〜320文字'];
-  const length = lengths[Math.floor(Math.random() * lengths.length)];
+  // 文字数のバリエーション（100〜300文字）
+  const charRanges = [
+    { min: 100, max: 150, desc: '100〜150文字程度（簡潔に）' },
+    { min: 150, max: 200, desc: '150〜200文字程度（標準的）' },
+    { min: 200, max: 250, desc: '200〜250文字程度（やや詳しく）' },
+    { min: 250, max: 300, desc: '250〜300文字程度（詳細に）' }
+  ];
+  const randomCharRange = charRanges[Math.floor(Math.random() * charRanges.length)];
 
-  // 絵文字の使用
-  const emoji = Math.random() < 0.25 ? '絵文字1〜2個OK' : '絵文字なし';
-
-  // 良かったポイント
-  let points = '';
+  // 良かったポイントのセクション
+  let goodPointsSection = '';
   if (goodPoints) {
-    points = `良かった点: ${goodPoints}`;
+    goodPointsSection = `
+【お客様が良かったと感じた点】
+${goodPoints.split(',').map(p => '- ' + p.trim()).join('\n')}
+
+これらの良かった点を口コミに自然に盛り込んでください。`;
   }
 
-  // シンプルで直接的なプロンプト
-  return `蒲田の眉毛まつ毛サロンの口コミを1つ書いてください。
+  // 文字数のバリエーション（100〜400文字）
+  const charVariations = [
+    '100〜150文字程度（短めに簡潔に）',
+    '150〜200文字程度（標準的な長さ）',
+    '200〜280文字程度（やや詳しく）',
+    '280〜350文字程度（詳細に）',
+    '350〜400文字程度（しっかり書く）'
+  ];
+  const randomCharDesc = charVariations[Math.floor(Math.random() * charVariations.length)];
 
-メニュー: ${menu}
-評価: ${overall}/5点（${toneHint}）
-${points}
+  // 文体・トーンのバリエーション
+  const toneStyles = [
+    '丁寧な敬語調（「〜でした」「〜いただきました」）',
+    'カジュアルな口調（「〜だった」「〜してくれた」「〜だよね」）',
+    '淡々とした事実ベースの文体',
+    '親しみやすい話し言葉（「〜なんです」「〜ですよ」）',
+    'シンプルで短文中心',
+    '少し詳しめの説明調'
+  ];
+  const randomToneStyle = toneStyles[Math.floor(Math.random() * toneStyles.length)];
 
-条件:
-- ${length}で書く
-- ${style}で書く
-- ${emoji}
-- SEOワード（眉毛/まつ毛/パリジェンヌ/蒲田など）を1〜3個自然に含める
-- AIっぽくない自然な文章
-- 口コミ本文のみ出力（前置き不要）
+  // 絵文字使用の有無
+  const useEmoji = Math.random() < 0.3; // 30%の確率で絵文字使用
+  const emojiInstruction = useEmoji
+    ? '適度に絵文字を使ってください（1〜3個程度、使いすぎない）'
+    : '絵文字は使用しないでください';
 
-口コミ:`;
+  return `あなたは蒲田にある眉毛まつ毛サロンに実際に通っている一般のお客様です。
+Googleマップに投稿する自然な口コミを作成してください。
+
+【施術メニュー】${menu}
+
+【お客様の満足度】
+- 総合: ${overall}/5点
+- 仕上がり: ${quality}/5点
+- 接客: ${service}/5点
+- 雰囲気: ${atmosphere}/5点
+- コスパ: ${value}/5点
+${goodPointsSection}
+
+【今回の文体・トーン】${randomToneStyle}
+【文字数】${randomCharDesc}
+
+【重要なルール】
+1. 以下のSEOキーワードから1〜5個を自然な文脈で含めてください：
+   - 眉毛関連: 眉毛、まゆ毛、アイブロウ、眉毛サロン、眉毛スタイリング、眉デザイン
+   - まつ毛関連: まつ毛、まつげ、まつ毛パーマ、まつげパーマ、パリジェンヌ、ラッシュリフト、まつ毛サロン、眉毛まつ毛サロン
+   - 施術関連: 仕上がり、デザイン、カウンセリング、技術
+   - 場所関連: 蒲田、大田区、蒲田駅西口から徒歩2分、蒲田駅から徒歩3分
+
+2. 絶対にAIが書いたとばれないような自然な文章にしてください
+3. 実際に体験したかのような具体的でリアルな表現を使ってください
+4. 大げさな表現や過度な褒め言葉は避け、自然体で書いてください
+5. ${emojiInstruction}
+6. 口コミ本文のみを出力してください（「口コミ:」などの前置きは不要）
+7. 毎回異なる視点・表現で書いてください
+
+口コミを1つだけ生成：`;
 }
 
 /**
