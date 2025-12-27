@@ -12,7 +12,7 @@ window.CONFIG = {
 
     // Hot Pepper Beauty Review URL (Primary)
     // サロンのHot Pepper Beauty口コミ投稿ページURLを設定してください
-    HOTPEPPER_REVIEW_URL: '',
+    HOTPEPPER_REVIEW_URL: 'https://beauty.hotpepper.jp/kr/slnH000770276/review/',
 
     // Google Review URL (Secondary)
     GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
