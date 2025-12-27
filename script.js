@@ -150,6 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeSelectionButtons();
     initializeReviewLinks();
     updateProgress();
+    // Initialize active states on load
+    updateActiveInputStates();
 });
 
 /**
@@ -659,6 +661,64 @@ function validateStep1() {
 
     const isValid = allRatingsSet && state.selectedMenu !== '';
     elements.nextToStep2.disabled = !isValid;
+
+    // Update active states to show next input
+    updateActiveInputStates();
+}
+
+/**
+ * Update active states to highlight where to input next
+ */
+function updateActiveInputStates() {
+    const ratingHero = document.querySelector('.rating-hero');
+    const ratingItems = document.querySelectorAll('.rating-list-item');
+    const menuFormGroup = document.querySelector('.form-group');
+
+    // Remove all active states first
+    if (ratingHero) {
+        ratingHero.classList.remove('active', 'completed');
+    }
+    ratingItems.forEach(item => item.classList.remove('active'));
+    if (menuFormGroup) {
+        menuFormGroup.classList.remove('active');
+    }
+
+    // Determine what to highlight next
+    if (state.ratings.overall === 0) {
+        // Overall rating not set - highlight hero
+        if (ratingHero) {
+            ratingHero.classList.add('active');
+        }
+    } else {
+        // Overall is set - mark as completed
+        if (ratingHero) {
+            ratingHero.classList.add('completed');
+        }
+
+        // Check detailed ratings in order
+        const ratingOrder = ['quality', 'service', 'atmosphere', 'value'];
+        let nextRating = null;
+
+        for (const category of ratingOrder) {
+            if (state.ratings[category] === 0) {
+                nextRating = category;
+                break;
+            }
+        }
+
+        if (nextRating) {
+            // Highlight next rating item
+            const nextItem = document.querySelector(`.rating-list-item[data-category="${nextRating}"]`);
+            if (nextItem) {
+                nextItem.classList.add('active');
+            }
+        } else if (state.selectedMenu === '') {
+            // All ratings set, menu not selected
+            if (menuFormGroup) {
+                menuFormGroup.classList.add('active');
+            }
+        }
+    }
 }
 
 function validateStep2() {
