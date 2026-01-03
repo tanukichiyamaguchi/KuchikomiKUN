@@ -8,9 +8,13 @@
 window.CONFIG = {
     // Google Apps Script Web App URL
     // GASをデプロイ後、ここにURLを設定してください
-    GAS_URL: 'https://script.google.com/macros/s/AKfycbyxPSSiJsfkq5qw4_yvbZX5TexV7HRltFA3s2NqJ3aKNyi444VVZCguLQd4HCmcGfRkIA/exec',
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbxCtRB9pp4mf-wMLqrJFnAoCxAcO48AYvg4MoKxtDUKNKcUj2KBDMEpQ2LgnlikA976aQ/exec',
 
-    // Google Review URL
+    // Hot Pepper Beauty Review URL (Primary)
+    // サロンのHot Pepper Beauty口コミ投稿ページURLを設定してください
+    HOTPEPPER_REVIEW_URL: 'https://beauty.hotpepper.jp/kr/slnH000770276/review/',
+
+    // Google Review URL (Secondary)
     GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
 
     // Salon Info

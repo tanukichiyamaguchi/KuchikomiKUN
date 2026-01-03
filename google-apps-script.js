@@ -105,7 +105,8 @@ function doGet(e) {
           quality: parseInt(e.parameter.quality) || 3,
           service: parseInt(e.parameter.service) || 3,
           atmosphere: parseInt(e.parameter.atmosphere) || 3,
-          value: parseInt(e.parameter.value) || 3
+          value: parseInt(e.parameter.value) || 3,
+          goodPoints: e.parameter.goodPoints || ''
         };
         result = generateReviewWithAI(data);
         break;
@@ -163,7 +164,7 @@ function doPost(e) {
 }
 
 /**
- * Gemini 2.5 Flash APIを使用して口コミを生成
+ * Gemini 2.0 Flash APIを使用して口コミを生成
  * @param {Object} data - 評価データ
  * @returns {Object} - 生成結果
  */
@@ -172,60 +173,97 @@ function generateReviewWithAI(data) {
   const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
 
   if (!apiKey) {
+    Logger.log('GEMINI_API_KEY is not set in script properties');
     // APIキーが設定されていない場合はテンプレートを使用
     return {
       status: 'success',
       review: generateReviewFromTemplate(data),
-      source: 'template'
+      source: 'template',
+      debug: 'API key not configured'
     };
   }
 
   try {
     const prompt = createReviewPrompt(data);
+    Logger.log('Generated prompt length: ' + prompt.length);
 
-    // Gemini 2.5 Flash API エンドポイント
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
+    // Gemini 2.0 Flash API エンドポイント
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
+
+    const payload = {
+      contents: [
+        {
+          parts: [
+            {
+              text: prompt
+            }
+          ]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.9,
+        maxOutputTokens: 8192,
+        topP: 0.95
+      }
+    };
+
+    Logger.log('Calling Gemini API...');
 
     const response = UrlFetchApp.fetch(url, {
       method: 'post',
       headers: {
         'Content-Type': 'application/json'
       },
-      payload: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt
-              }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 1.0,
-          maxOutputTokens: 500,
-          topP: 0.95,
-          topK: 40
-        }
-      }),
+      payload: JSON.stringify(payload),
       muteHttpExceptions: true
     });
 
     const responseCode = response.getResponseCode();
     const responseText = response.getContentText();
 
+    Logger.log('Gemini API Response Code: ' + responseCode);
+
     if (responseCode !== 200) {
-      Logger.log('Gemini API Error: ' + responseText);
+      Logger.log('Gemini API Error Response: ' + responseText);
       // エラー時はテンプレートにフォールバック
       return {
         status: 'success',
         review: generateReviewFromTemplate(data),
-        source: 'template'
+        source: 'template',
+        debug: 'API error: ' + responseCode
       };
     }
 
     const result = JSON.parse(responseText);
-    const review = result.candidates[0].content.parts[0].text.trim();
+    Logger.log('Gemini API Response parsed successfully');
+    Logger.log('Full response: ' + responseText.substring(0, 2000));
+
+    // レスポンス構造を確認
+    if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
+      Logger.log('Unexpected response structure: ' + responseText);
+      return {
+        status: 'success',
+        review: generateReviewFromTemplate(data),
+        source: 'template',
+        debug: 'Invalid response structure'
+      };
+    }
+
+    // Gemini 2.5 Flashは複数のpartsを返す可能性がある（thinking含む）
+    const parts = result.candidates[0].content.parts;
+    Logger.log('Number of parts: ' + parts.length);
+
+    // 最後のpartがテキスト出力（thinkingがある場合は最初のpartがthinking）
+    let review = '';
+    for (let i = 0; i < parts.length; i++) {
+      Logger.log('Part ' + i + ': ' + JSON.stringify(parts[i]).substring(0, 200));
+      if (parts[i].text) {
+        review = parts[i].text.trim();
+      }
+    }
+
+    Logger.log('AI generated review length: ' + review.length);
+    Logger.log('AI generated review: ' + review);
 
     return {
       status: 'success',
@@ -239,7 +277,8 @@ function generateReviewWithAI(data) {
     return {
       status: 'success',
       review: generateReviewFromTemplate(data),
-      source: 'template'
+      source: 'template',
+      debug: 'Exception: ' + error.toString()
     };
   }
 }
@@ -250,7 +289,15 @@ function generateReviewWithAI(data) {
  * @returns {string} - プロンプト
  */
 function createReviewPrompt(data) {
-  const { menu, overall, quality, service, atmosphere, value } = data;
+  // データが未定義の場合のデフォルト値
+  const safeData = data || {};
+  const menu = safeData.menu || '施術';
+  const overall = safeData.overall || 3;
+  const quality = safeData.quality || overall;
+  const service = safeData.service || overall;
+  const atmosphere = safeData.atmosphere || overall;
+  const value = safeData.value || overall;
+  const goodPoints = safeData.goodPoints || '';
 
   // 評価に応じたトーン設定
   let tone = '';
@@ -285,37 +332,74 @@ function createReviewPrompt(data) {
   ];
   const randomCharRange = charRanges[Math.floor(Math.random() * charRanges.length)];
 
-  return `あなたは眉毛まつ毛サロンに通う一般のお客様です。
-以下の評価に基づいて、Googleマップに投稿する口コミを作成してください。
+  // 良かったポイントのセクション
+  let goodPointsSection = '';
+  if (goodPoints) {
+    goodPointsSection = `
+【お客様が良かったと感じた点】
+${goodPoints.split(',').map(p => '- ' + p.trim()).join('\n')}
+
+これらの良かった点を口コミに自然に盛り込んでください。`;
+  }
+
+  // 文字数のバリエーション（100〜400文字）
+  const charVariations = [
+    '100〜150文字程度（短めに簡潔に）',
+    '150〜200文字程度（標準的な長さ）',
+    '200〜280文字程度（やや詳しく）',
+    '280〜350文字程度（詳細に）',
+    '350〜400文字程度（しっかり書く）'
+  ];
+  const randomCharDesc = charVariations[Math.floor(Math.random() * charVariations.length)];
+
+  // 文体・トーンのバリエーション
+  const toneStyles = [
+    '丁寧な敬語調（「〜でした」「〜いただきました」）',
+    'カジュアルな口調（「〜だった」「〜してくれた」「〜だよね」）',
+    '淡々とした事実ベースの文体',
+    '親しみやすい話し言葉（「〜なんです」「〜ですよ」）',
+    'シンプルで短文中心',
+    '少し詳しめの説明調'
+  ];
+  const randomToneStyle = toneStyles[Math.floor(Math.random() * toneStyles.length)];
+
+  // 絵文字使用の有無
+  const useEmoji = Math.random() < 0.3; // 30%の確率で絵文字使用
+  const emojiInstruction = useEmoji
+    ? '適度に絵文字を使ってください（1〜3個程度、使いすぎない）'
+    : '絵文字は使用しないでください';
+
+  return `あなたは蒲田にある眉毛まつ毛サロンに実際に通っている一般のお客様です。
+Googleマップに投稿する自然な口コミを作成してください。
 
 【施術メニュー】${menu}
 
-【評価】
-- 総合満足度: ${overall}点/5点
-- 施術の仕上がり: ${quality}点/5点
-- 接客・カウンセリング: ${service}点/5点
-- 店内の雰囲気: ${atmosphere}点/5点
-- 価格・コスパ: ${value}点/5点
+【お客様の満足度】
+- 総合: ${overall}/5点
+- 仕上がり: ${quality}/5点
+- 接客: ${service}/5点
+- 雰囲気: ${atmosphere}/5点
+- コスパ: ${value}/5点
+${goodPointsSection}
 
-【口コミのトーン】${tone}
-
-【今回の文体】${randomStyle}
-
-【文字数】${randomCharRange.desc}
+【今回の文体・トーン】${randomToneStyle}
+【文字数】${randomCharDesc}
 
 【重要なルール】
-1. 必ず以下のSEOキーワードのうち1〜3個を自然に含めてください：
+1. 以下のSEOキーワードから1〜5個を自然な文脈で含めてください：
    - 眉毛関連: 眉毛、まゆ毛、アイブロウ、眉毛サロン、眉毛スタイリング、眉デザイン
-   - まつ毛関連: まつ毛、まつげ、まつ毛パーマ、まつげパーマ、パリジェンヌ、ラッシュリフト、まつ毛サロン
-   - 施術関連: 仕上がり、デザイン、施術、カウンセリング、技術
+   - まつ毛関連: まつ毛、まつげ、まつ毛パーマ、まつげパーマ、パリジェンヌ、ラッシュリフト、まつ毛サロン、眉毛まつ毛サロン
+   - 施術関連: 仕上がり、デザイン、カウンセリング、技術
+   - 場所関連: 蒲田、大田区、蒲田駅西口から徒歩2分、蒲田駅から徒歩3分
 
-2. 絵文字は使用しないでください
-3. サロン名は含めないでください
-4. 実際に体験したかのような具体的で自然な表現を使ってください
-5. 他の口コミとは異なる独自の視点や表現を心がけてください
-6. 口コミ本文のみを出力してください（説明や前置きは不要）
+2. 絶対にAIが書いたとばれないような自然な文章にしてください
+3. 実際に体験したかのような具体的でリアルな表現を使ってください
+4. 大げさな表現や過度な褒め言葉は避け、自然体で書いてください
+5. ${emojiInstruction}
+6. 口コミ本文のみを出力してください（「口コミ:」などの前置きは不要）
+7. 毎回異なる視点・表現で書いてください
 
-口コミを1つだけ生成してください：`;
+口コミを1つだけ生成：`;
 }
 
 /**
@@ -324,8 +408,9 @@ function createReviewPrompt(data) {
  * @returns {string} - 生成された口コミ
  */
 function generateReviewFromTemplate(data) {
-  const rating = data.overall || 3;
-  const menu = data.menu || '施術';
+  const safeData = data || {};
+  const rating = safeData.overall || 3;
+  const menu = safeData.menu || '施術';
 
   const templates = {
     5: [
