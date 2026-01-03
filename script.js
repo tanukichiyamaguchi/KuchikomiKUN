@@ -670,6 +670,10 @@ function goToStep(step) {
         setupStep3();
     } else if (step === 4) {
         updatePreview();
+        // Add glow to copy button when entering step 4
+        if (elements.copyReviewBtn) {
+            elements.copyReviewBtn.classList.add('glow');
+        }
     }
 
     // Auto-scroll to relevant content
@@ -747,6 +751,13 @@ function validateStep1() {
     const isValid = allRatingsSet && state.selectedMenu !== '';
     elements.nextToStep2.disabled = !isValid;
 
+    // Add/remove glow effect based on validity
+    if (isValid) {
+        elements.nextToStep2.classList.add('glow');
+    } else {
+        elements.nextToStep2.classList.remove('glow');
+    }
+
     // Update active states to show next input
     updateActiveInputStates();
 }
@@ -818,12 +829,26 @@ function validateStep2() {
     }
 
     elements.nextToStep3.disabled = !isValid;
+
+    // Add/remove glow effect based on validity
+    if (isValid) {
+        elements.nextToStep3.classList.add('glow');
+    } else {
+        elements.nextToStep3.classList.remove('glow');
+    }
 }
 
 function validateStep3() {
     const text = state.editedReview.trim();
     const isValid = text.length >= CONFIG.MIN_CHARS && text.length <= CONFIG.MAX_CHARS;
     elements.nextToStep4.disabled = !isValid;
+
+    // Add/remove glow effect based on validity
+    if (isValid) {
+        elements.nextToStep4.classList.add('glow');
+    } else {
+        elements.nextToStep4.classList.remove('glow');
+    }
 }
 
 function updateCharCount() {
@@ -1033,11 +1058,27 @@ function updateBadgesAfterCopy() {
         copyBadge.classList.add('completed');
     }
 
-    // Show hotpepper badge
+    // Remove glow from copy button
+    elements.copyReviewBtn.classList.remove('glow');
+
+    // Show hotpepper badge and add glow to hotpepper button
     const hotpepperBadge = document.getElementById('hotpepperBadge');
     if (hotpepperBadge) {
         hotpepperBadge.classList.remove('hidden');
     }
+
+    // Add glow to hotpepper button
+    if (elements.hotpepperReviewBtn) {
+        elements.hotpepperReviewBtn.classList.add('glow');
+    }
+
+    // Auto-scroll to hotpepper section
+    setTimeout(() => {
+        const hotpepperSection = document.querySelector('.review-platform-section.primary');
+        if (hotpepperSection) {
+            scrollToElement(hotpepperSection, 80);
+        }
+    }, 300);
 }
 
 // =====================================================
