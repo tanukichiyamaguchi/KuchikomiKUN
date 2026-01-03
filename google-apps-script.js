@@ -164,7 +164,7 @@ function doPost(e) {
 }
 
 /**
- * Gemini 2.5 Flash APIを使用して口コミを生成
+ * Gemini 2.0 Flash APIを使用して口コミを生成
  * @param {Object} data - 評価データ
  * @returns {Object} - 生成結果
  */
@@ -187,8 +187,8 @@ function generateReviewWithAI(data) {
     const prompt = createReviewPrompt(data);
     Logger.log('Generated prompt length: ' + prompt.length);
 
-    // Gemini 2.5 Flash API エンドポイント
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey;
+    // Gemini 2.0 Flash API エンドポイント
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
 
     const payload = {
       contents: [
