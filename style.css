@@ -664,26 +664,27 @@ body {
     box-shadow: none !important;
 }
 
-/* Primary CTA - Luxury Gold 3D Effect */
+/* Primary CTA - Refined Champagne Gold */
 .btn-primary {
     background: linear-gradient(180deg,
-        #E8D5A3 0%,
-        #D4B896 15%,
-        #C9A86C 50%,
-        #B8944A 85%,
-        #A07D35 100%);
-    color: #3D2E1C;
+        #F5ECD7 0%,
+        #E8DBC4 10%,
+        #D4C4A8 30%,
+        #C9B896 50%,
+        #BDA97D 70%,
+        #A89660 100%);
+    color: #4A3C28;
     box-shadow:
-        0 1px 0 rgba(255,255,255,0.4) inset,
-        0 -2px 4px rgba(0,0,0,0.1) inset,
-        0 4px 0 #8B6914,
-        0 6px 8px rgba(0,0,0,0.25),
-        0 10px 20px rgba(139,105,20,0.3);
-    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 -1px 3px rgba(0,0,0,0.08) inset,
+        0 4px 0 #9A8555,
+        0 5px 8px rgba(0,0,0,0.15),
+        0 8px 16px rgba(154,133,85,0.2);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
     transform: translateY(0);
-    border: 1px solid rgba(255,255,255,0.2);
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    border: 1px solid rgba(255,255,255,0.3);
+    font-weight: 600;
+    letter-spacing: 0.03em;
 }
 
 .btn-primary::before {
@@ -692,8 +693,8 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: 50%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.05));
+    height: 45%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0.1));
     border-radius: var(--radius-md) var(--radius-md) 0 0;
     pointer-events: none;
 }
@@ -701,20 +702,46 @@ body {
 .btn-primary:not(:disabled):hover {
     transform: translateY(-2px);
     box-shadow:
-        0 1px 0 rgba(255,255,255,0.4) inset,
-        0 -2px 4px rgba(0,0,0,0.1) inset,
-        0 6px 0 #8B6914,
-        0 8px 12px rgba(0,0,0,0.3),
-        0 14px 28px rgba(139,105,20,0.4);
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 -1px 3px rgba(0,0,0,0.08) inset,
+        0 6px 0 #9A8555,
+        0 8px 12px rgba(0,0,0,0.2),
+        0 12px 24px rgba(154,133,85,0.25);
 }
 
 .btn-primary:not(:disabled):active {
     transform: translateY(2px);
     box-shadow:
-        0 1px 0 rgba(255,255,255,0.4) inset,
-        0 -2px 4px rgba(0,0,0,0.1) inset,
-        0 2px 0 #8B6914,
-        0 3px 6px rgba(0,0,0,0.2);
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 -1px 3px rgba(0,0,0,0.08) inset,
+        0 2px 0 #9A8555,
+        0 3px 6px rgba(0,0,0,0.15);
+}
+
+/* Glowing effect for CTA when ready */
+.btn-primary.glow {
+    animation: btn-glow 2s ease-in-out infinite;
+}
+
+@keyframes btn-glow {
+    0%, 100% {
+        box-shadow:
+            0 1px 0 rgba(255,255,255,0.6) inset,
+            0 -1px 3px rgba(0,0,0,0.08) inset,
+            0 4px 0 #9A8555,
+            0 5px 8px rgba(0,0,0,0.15),
+            0 8px 16px rgba(154,133,85,0.2);
+    }
+    50% {
+        box-shadow:
+            0 1px 0 rgba(255,255,255,0.6) inset,
+            0 -1px 3px rgba(0,0,0,0.08) inset,
+            0 4px 0 #9A8555,
+            0 5px 8px rgba(0,0,0,0.15),
+            0 8px 16px rgba(154,133,85,0.2),
+            0 0 20px rgba(212,196,168,0.6),
+            0 0 40px rgba(212,196,168,0.4);
+    }
 }
 
 /* Outline */
@@ -766,6 +793,26 @@ body {
         0 3px 6px rgba(0,0,0,0.15);
 }
 
+/* Glowing effect for Copy button when ready */
+.btn-copy.glow {
+    animation: btn-copy-glow 2s ease-in-out infinite;
+}
+
+@keyframes btn-copy-glow {
+    0%, 100% {
+        box-shadow:
+            0 4px 0 var(--gray-800),
+            0 6px 10px rgba(0,0,0,0.2);
+    }
+    50% {
+        box-shadow:
+            0 4px 0 var(--gray-800),
+            0 6px 10px rgba(0,0,0,0.2),
+            0 0 20px rgba(38,38,38,0.5),
+            0 0 40px rgba(38,38,38,0.3);
+    }
+}
+
 /* Google */
 .btn-google {
     background: var(--white);
@@ -786,25 +833,26 @@ body {
     height: 18px;
 }
 
-/* Hotpepper - Luxury Gold 3D Effect */
+/* Hotpepper - Refined Champagne Gold */
 .btn-hotpepper {
     background: linear-gradient(180deg,
-        #E8D5A3 0%,
-        #D4B896 15%,
-        #C9A86C 50%,
-        #B8944A 85%,
-        #A07D35 100%);
-    color: #3D2E1C;
+        #F5ECD7 0%,
+        #E8DBC4 10%,
+        #D4C4A8 30%,
+        #C9B896 50%,
+        #BDA97D 70%,
+        #A89660 100%);
+    color: #4A3C28;
     box-shadow:
-        0 1px 0 rgba(255,255,255,0.4) inset,
-        0 -2px 4px rgba(0,0,0,0.1) inset,
-        0 4px 0 #8B6914,
-        0 6px 8px rgba(0,0,0,0.25),
-        0 10px 20px rgba(139,105,20,0.3);
-    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
-    border: 1px solid rgba(255,255,255,0.2);
-    font-weight: 700;
-    letter-spacing: 0.02em;
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 -1px 3px rgba(0,0,0,0.08) inset,
+        0 4px 0 #9A8555,
+        0 5px 8px rgba(0,0,0,0.15),
+        0 8px 16px rgba(154,133,85,0.2);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+    border: 1px solid rgba(255,255,255,0.3);
+    font-weight: 600;
+    letter-spacing: 0.03em;
 }
 
 .btn-hotpepper::before {
@@ -813,8 +861,8 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: 50%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.05));
+    height: 45%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0.1));
     border-radius: var(--radius-md) var(--radius-md) 0 0;
     pointer-events: none;
 }
@@ -822,20 +870,25 @@ body {
 .btn-hotpepper:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 1px 0 rgba(255,255,255,0.4) inset,
-        0 -2px 4px rgba(0,0,0,0.1) inset,
-        0 6px 0 #8B6914,
-        0 8px 12px rgba(0,0,0,0.3),
-        0 14px 28px rgba(139,105,20,0.4);
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 -1px 3px rgba(0,0,0,0.08) inset,
+        0 6px 0 #9A8555,
+        0 8px 12px rgba(0,0,0,0.2),
+        0 12px 24px rgba(154,133,85,0.25);
 }
 
 .btn-hotpepper:active {
     transform: translateY(2px);
     box-shadow:
-        0 1px 0 rgba(255,255,255,0.4) inset,
-        0 -2px 4px rgba(0,0,0,0.1) inset,
-        0 2px 0 #8B6914,
-        0 3px 6px rgba(0,0,0,0.2);
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 -1px 3px rgba(0,0,0,0.08) inset,
+        0 2px 0 #9A8555,
+        0 3px 6px rgba(0,0,0,0.15);
+}
+
+/* Glowing effect for Hotpepper when ready */
+.btn-hotpepper.glow {
+    animation: btn-glow 2s ease-in-out infinite;
 }
 
 .hotpepper-icon {
