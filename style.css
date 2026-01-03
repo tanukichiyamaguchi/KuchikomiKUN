@@ -1,28 +1,29 @@
 /* =====================================================
    KATEstageLASH Review System
-   Mobile-First Luxury Design
+   Mobile-First Luxury Design - Champagne Gold Edition
    ===================================================== */
 
 :root {
-    /* Gold Palette */
-    --gold-50: #FFFDF5;
-    --gold-100: #FBF7E8;
-    --gold-200: #F3EBD0;
-    --gold-300: #E6D5A8;
-    --gold-400: #D4BC6A;
-    --gold-500: #C9A227;
-    --gold-600: #B8921F;
-    --gold-700: #9A7A1A;
-    --gold-800: #7D6315;
+    /* Champagne Gold Palette - More elegant and refined */
+    --gold-50: #FFFDF7;
+    --gold-100: #FDF8EC;
+    --gold-200: #F7EED8;
+    --gold-300: #EFE0BC;
+    --gold-400: #DECCA3;
+    --gold-500: #D4B896;
+    --gold-600: #C4A67A;
+    --gold-700: #A8895D;
+    --gold-800: #8B7048;
 
-    /* Gradients */
-    --gradient-gold: linear-gradient(145deg, #E6D5A8 0%, #C9A227 40%, #9A7A1A 100%);
-    --gradient-gold-btn: linear-gradient(145deg, #D4BC6A 0%, #C9A227 50%, #B8921F 100%);
-    --gradient-gold-hover: linear-gradient(145deg, #C9A227 0%, #9A7A1A 50%, #7D6315 100%);
+    /* Gradients - Champagne Gold */
+    --gradient-gold: linear-gradient(145deg, #EFE0BC 0%, #D4B896 40%, #A8895D 100%);
+    --gradient-gold-btn: linear-gradient(145deg, #DECCA3 0%, #D4B896 50%, #C4A67A 100%);
+    --gradient-gold-hover: linear-gradient(145deg, #D4B896 0%, #A8895D 50%, #8B7048 100%);
+    --gradient-gold-3d: linear-gradient(180deg, #F7EED8 0%, #D4B896 50%, #A8895D 100%);
 
     /* Neutral */
     --white: #FFFFFF;
-    --cream: #FFFEF8;
+    --cream: #FFFEF9;
     --gray-50: #FAFAFA;
     --gray-100: #F5F5F5;
     --gray-200: #E5E5E5;
@@ -57,14 +58,25 @@
     --radius-xl: 20px;
     --radius-full: 9999px;
 
-    /* Shadows - Black based */
+    /* Shadows - Black based for luxury depth */
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
     --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
     --shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04);
     --shadow-xl: 0 20px 25px rgba(0,0,0,0.1), 0 8px 10px rgba(0,0,0,0.04);
-    --shadow-btn: 0 4px 14px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.1);
-    --shadow-btn-hover: 0 8px 20px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.1);
-    --shadow-focus: 0 0 0 3px rgba(201,162,39,0.3);
+
+    /* 3D Button Shadows */
+    --shadow-btn-3d:
+        0 4px 0 #A8895D,
+        0 6px 10px rgba(0,0,0,0.2),
+        0 2px 4px rgba(0,0,0,0.1);
+    --shadow-btn-3d-hover:
+        0 2px 0 #A8895D,
+        0 4px 8px rgba(0,0,0,0.2);
+    --shadow-btn-3d-active:
+        0 1px 0 #A8895D,
+        0 2px 4px rgba(0,0,0,0.15);
+
+    --shadow-focus: 0 0 0 3px rgba(212,184,150,0.4);
 
     /* Transitions */
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -97,8 +109,8 @@ body {
     font-family: var(--font-primary);
     background: var(--cream);
     background-image:
-        radial-gradient(ellipse at 50% 0%, rgba(201, 162, 39, 0.04) 0%, transparent 60%),
-        radial-gradient(ellipse at 100% 100%, rgba(201, 162, 39, 0.02) 0%, transparent 50%);
+        radial-gradient(ellipse at 50% 0%, rgba(212, 184, 150, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 100% 100%, rgba(212, 184, 150, 0.03) 0%, transparent 50%);
     min-height: 100vh;
     min-height: 100dvh;
     color: var(--gray-700);
@@ -259,6 +271,60 @@ body {
 }
 
 /* =====================================================
+   Menu Selection - Prominent Design
+   ===================================================== */
+
+.menu-selection {
+    background: linear-gradient(180deg, var(--gold-50) 0%, var(--white) 100%);
+    border: 2px solid var(--gold-400);
+    border-radius: var(--radius-xl);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    position: relative;
+}
+
+.menu-selection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-gold);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.menu-selection .form-label {
+    color: var(--gold-700);
+    font-size: 0.875rem;
+    margin-bottom: var(--space-md);
+}
+
+.menu-selection .form-select {
+    border-color: var(--gold-300);
+    background-color: var(--white);
+    font-weight: 500;
+}
+
+.menu-selection .form-select:focus {
+    border-color: var(--gold-500);
+}
+
+.menu-required-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.75rem;
+    color: var(--gold-600);
+    margin-top: var(--space-sm);
+}
+
+.menu-required-hint::before {
+    content: '↑';
+    font-size: 1rem;
+}
+
+/* =====================================================
    Form Elements - Clear Focus States
    ===================================================== */
 
@@ -309,7 +375,7 @@ body {
     outline: none;
     border-color: var(--gold-500);
     box-shadow: var(--shadow-focus);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23C9A227' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23D4B896' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 }
 
 /* Highlight active input area */
@@ -568,7 +634,7 @@ body {
 }
 
 /* =====================================================
-   Buttons - Mobile Friendly with Clear Shadows
+   Buttons - 3D Premium Design
    ===================================================== */
 
 .btn {
@@ -588,20 +654,23 @@ body {
     text-decoration: none;
     min-height: var(--touch-comfortable);
     -webkit-tap-highlight-color: transparent;
+    position: relative;
 }
 
 .btn:disabled {
     opacity: 0.35;
     cursor: not-allowed;
     transform: none !important;
+    box-shadow: none !important;
 }
 
-/* Primary CTA */
+/* Primary CTA - 3D Effect */
 .btn-primary {
-    background: var(--gradient-gold-btn);
+    background: var(--gradient-gold-3d);
     color: var(--white);
-    box-shadow: var(--shadow-btn);
-    position: relative;
+    box-shadow: var(--shadow-btn-3d);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    transform: translateY(0);
 }
 
 .btn-primary::before {
@@ -611,22 +680,21 @@ body {
     left: 0;
     right: 0;
     height: 50%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent);
+    background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent);
     border-radius: var(--radius-md) var(--radius-md) 0 0;
     pointer-events: none;
 }
 
-.btn-primary:not(:disabled):active {
-    transform: scale(0.98);
-    box-shadow: var(--shadow-sm);
+.btn-primary:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 6px 0 #A8895D,
+        0 10px 20px rgba(0,0,0,0.25);
 }
 
-@media (hover: hover) {
-    .btn-primary:not(:disabled):hover {
-        background: var(--gradient-gold-hover);
-        box-shadow: var(--shadow-btn-hover);
-        transform: translateY(-1px);
-    }
+.btn-primary:not(:disabled):active {
+    transform: translateY(2px);
+    box-shadow: var(--shadow-btn-3d-active);
 }
 
 /* Outline */
@@ -634,10 +702,12 @@ body {
     background: var(--white);
     color: var(--gray-600);
     border: 2px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-outline:active {
     background: var(--gray-50);
+    transform: translateY(1px);
 }
 
 @media (hover: hover) {
@@ -664,11 +734,16 @@ body {
     background: var(--gray-900);
     color: var(--white);
     margin-bottom: var(--space-md);
-    box-shadow: var(--shadow-md);
+    box-shadow:
+        0 4px 0 var(--gray-800),
+        0 6px 10px rgba(0,0,0,0.2);
 }
 
 .btn-copy:active {
-    background: var(--gray-800);
+    transform: translateY(2px);
+    box-shadow:
+        0 2px 0 var(--gray-800),
+        0 3px 6px rgba(0,0,0,0.15);
 }
 
 /* Google */
@@ -691,12 +766,12 @@ body {
     height: 18px;
 }
 
-/* Hotpepper */
+/* Hotpepper - 3D Effect */
 .btn-hotpepper {
-    background: var(--gradient-gold-btn);
+    background: var(--gradient-gold-3d);
     color: var(--white);
-    box-shadow: var(--shadow-btn);
-    position: relative;
+    box-shadow: var(--shadow-btn-3d);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .btn-hotpepper::before {
@@ -706,22 +781,21 @@ body {
     left: 0;
     right: 0;
     height: 50%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent);
+    background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent);
     border-radius: var(--radius-md) var(--radius-md) 0 0;
     pointer-events: none;
 }
 
-.btn-hotpepper:active {
-    transform: scale(0.98);
-    box-shadow: var(--shadow-sm);
+.btn-hotpepper:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 6px 0 #A8895D,
+        0 10px 20px rgba(0,0,0,0.25);
 }
 
-@media (hover: hover) {
-    .btn-hotpepper:hover {
-        background: var(--gradient-gold-hover);
-        box-shadow: var(--shadow-btn-hover);
-        transform: translateY(-1px);
-    }
+.btn-hotpepper:active {
+    transform: translateY(2px);
+    box-shadow: var(--shadow-btn-3d-active);
 }
 
 .hotpepper-icon {
@@ -1043,8 +1117,41 @@ body {
 }
 
 /* =====================================================
-   Platform Sections
+   Platform Sections - Step 4 with Clear Guidance
    ===================================================== */
+
+.step4-guidance {
+    background: linear-gradient(180deg, var(--gold-100) 0%, var(--gold-50) 100%);
+    border: 2px solid var(--gold-400);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    text-align: center;
+}
+
+.step4-guidance-icon {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-sm);
+}
+
+.step4-guidance-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gold-800);
+    line-height: 1.5;
+}
+
+.step4-guidance-arrow {
+    font-size: 1.25rem;
+    color: var(--gold-600);
+    animation: bounce 1s infinite;
+    margin-top: var(--space-sm);
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+}
 
 .review-platform-section {
     background: var(--white);
@@ -1069,6 +1176,17 @@ body {
     height: 4px;
     background: var(--gradient-gold);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* Pulse animation for primary button */
+.review-platform-section.primary .btn-hotpepper {
+    animation: pulse-gold 2s infinite;
+}
+
+@keyframes pulse-gold {
+    0% { box-shadow: var(--shadow-btn-3d); }
+    50% { box-shadow: var(--shadow-btn-3d), 0 0 20px rgba(212, 184, 150, 0.4); }
+    100% { box-shadow: var(--shadow-btn-3d); }
 }
 
 .platform-header {
@@ -1132,7 +1250,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 6px rgba(201, 162, 39, 0.3);
+    box-shadow: 0 2px 6px rgba(212, 184, 150, 0.4);
 }
 
 .instructions-list li:last-child {
@@ -1272,6 +1390,11 @@ body {
     .star-btn.active:hover {
         background: var(--gradient-gold-btn);
         border-color: var(--gold-600);
+    }
+
+    .btn-primary:hover,
+    .btn-hotpepper:hover {
+        transform: none;
     }
 }
 

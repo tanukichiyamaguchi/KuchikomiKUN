@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#C9A227">
+    <meta name="theme-color" content="#D4B896">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="format-detection" content="telephone=no">
     <meta name="description" content="KATEstageLASH 蒲田西口店 - お客様の声をお聞かせください">
@@ -46,36 +46,28 @@
                 本日の施術はいかがでしたか？
             </h2>
 
-            <!-- Menu Selection -->
-            <div class="form-group">
-                <label class="form-label" for="menuSelect">ご利用メニュー</label>
+            <!-- Menu Selection - Prominent Design -->
+            <div class="menu-selection">
+                <label class="form-label" for="menuSelect">ご利用メニューを選択してください</label>
                 <select id="menuSelect" class="form-select">
                     <option value="">選択してください</option>
-                    <optgroup label="まつげパーマ">
-                        <option value="まつげパーマ（パリジェンヌラッシュリフト）">まつげパーマ（パリジェンヌラッシュリフト）</option>
-                        <option value="のびるまつげパーマ（幹細胞トリートメント付）">のびるまつげパーマ（幹細胞トリートメント付）</option>
-                        <option value="ラッシュリフト">ラッシュリフト</option>
-                    </optgroup>
-                    <optgroup label="アイブロウ（眉毛）">
-                        <option value="アイブロウ（眉毛wax）">アイブロウ（眉毛wax）</option>
-                        <option value="眉毛パーマ（ハリウッドブロウリフト）">眉毛パーマ（ハリウッドブロウリフト）</option>
-                        <option value="メンズアイブロウ">メンズアイブロウ</option>
-                    </optgroup>
                     <optgroup label="セットメニュー">
-                        <option value="まつ毛パーマ＋眉毛wax">まつ毛パーマ＋眉毛wax</option>
-                        <option value="のびるまつげパーマ＋眉毛wax">のびるまつげパーマ＋眉毛wax</option>
-                        <option value="まつ毛パーマ＋眉毛パーマ（ハリウッドブロウリフト）">まつ毛パーマ＋眉毛パーマ</option>
+                        <option value="まつ毛パーマ×眉WAX">まつ毛パーマ×眉WAX</option>
+                        <option value="まつ毛パーマ×ハリウッドブロウリフトHBL">まつ毛パーマ×ハリウッドブロウリフトHBL</option>
                     </optgroup>
-                    <optgroup label="学割メニュー">
-                        <option value="学割まつげパーマ">学割まつげパーマ</option>
-                        <option value="学割アイブロウ">学割アイブロウ</option>
-                        <option value="学割まつげパーマ＋眉毛wax">学割まつげパーマ＋眉毛wax</option>
+                    <optgroup label="まつ毛">
+                        <option value="まつ毛パーマ（パリジェンヌラッシュリフト）">まつ毛パーマ（パリジェンヌラッシュリフト）</option>
+                        <option value="まつ毛パーマ（選べるまつぱ）">まつ毛パーマ（選べるまつぱ）</option>
+                    </optgroup>
+                    <optgroup label="眉毛">
+                        <option value="眉毛WAX">眉毛WAX</option>
+                        <option value="眉パーマ（ハリウッドブロウリフトHBL）">眉パーマ（ハリウッドブロウリフトHBL）</option>
                     </optgroup>
                     <optgroup label="その他">
-                        <option value="お任せコース">お任せコース</option>
-                        <option value="その他">その他</option>
+                        <option value="おまかせコース">おまかせコース</option>
                     </optgroup>
                 </select>
+                <p class="menu-required-hint" id="menuHint" style="display: none;">メニューを選択してください</p>
             </div>
 
             <!-- Rating Categories - Mobile Optimized -->
@@ -369,6 +361,16 @@
                 口コミを投稿
             </h2>
 
+            <!-- Clear Guidance for Next Action -->
+            <div class="step4-guidance">
+                <div class="step4-guidance-icon">📋</div>
+                <p class="step4-guidance-text">
+                    まず「口コミをコピー」してから<br>
+                    Hot Pepper Beautyで投稿してください
+                </p>
+                <div class="step4-guidance-arrow">↓</div>
+            </div>
+
             <div class="review-preview">
                 <div class="preview-header">
                     <span class="preview-label">投稿する口コミ</span>
@@ -404,9 +406,9 @@
                     <svg class="hotpepper-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                         <defs>
                             <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#DFC65C"/>
-                                <stop offset="50%" style="stop-color:#C9A227"/>
-                                <stop offset="100%" style="stop-color:#A68A1F"/>
+                                <stop offset="0%" style="stop-color:#EFE0BC"/>
+                                <stop offset="50%" style="stop-color:#D4B896"/>
+                                <stop offset="100%" style="stop-color:#A8895D"/>
                             </linearGradient>
                         </defs>
                         <circle cx="12" cy="12" r="10" fill="white" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
