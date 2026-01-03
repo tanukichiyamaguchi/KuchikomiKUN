@@ -1125,26 +1125,47 @@ body {
     position: relative;
     width: 100%;
     margin-bottom: var(--space-md);
+    padding-top: var(--space-md);
 }
 
 .btn-with-badge .btn {
     margin-bottom: 0;
 }
 
-/* Press Here Badge */
+/* Press Here Badge - Overlay Style */
 .press-here-badge {
-    display: block;
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
     background: linear-gradient(145deg, #FF6B6B 0%, #E63946 100%);
     color: var(--white);
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
-    padding: var(--space-xs) var(--space-md);
+    padding: 6px var(--space-md);
     border-radius: var(--radius-full);
     text-align: center;
-    margin-bottom: var(--space-sm);
-    box-shadow: 0 2px 8px rgba(230, 57, 70, 0.4);
-    animation: badge-pulse 1.5s ease-in-out infinite;
+    white-space: nowrap;
+    box-shadow:
+        0 4px 12px rgba(230, 57, 70, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.2);
+    animation: badge-bounce 1s ease-in-out infinite;
     letter-spacing: 0.05em;
+    border: 2px solid var(--white);
+}
+
+.press-here-badge::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #E63946;
 }
 
 .press-here-badge.hidden {
@@ -1153,22 +1174,26 @@ body {
 
 .press-here-badge.completed {
     background: linear-gradient(145deg, #2ECC71 0%, #27AE60 100%);
-    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.4);
+    box-shadow:
+        0 4px 12px rgba(39, 174, 96, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.2);
     animation: none;
+}
+
+.press-here-badge.completed::after {
+    border-top-color: #27AE60;
 }
 
 .press-here-badge.completed::before {
     content: '✓ ';
 }
 
-@keyframes badge-pulse {
+@keyframes badge-bounce {
     0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 2px 8px rgba(230, 57, 70, 0.4);
+        transform: translateX(-50%) translateY(0);
     }
     50% {
-        transform: scale(1.02);
-        box-shadow: 0 4px 12px rgba(230, 57, 70, 0.6);
+        transform: translateX(-50%) translateY(-4px);
     }
 }
 
