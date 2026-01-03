@@ -252,6 +252,11 @@ function setHeroRating(value, container) {
     }
 
     validateStep1();
+
+    // Auto-scroll to next input
+    setTimeout(() => {
+        scrollToNextInput();
+    }, 200);
 }
 
 /**
@@ -339,6 +344,48 @@ function setListItemRating(category, value, container) {
     container.classList.add('rated');
 
     validateStep1();
+
+    // Auto-scroll to next input
+    setTimeout(() => {
+        scrollToNextInput();
+    }, 200);
+}
+
+/**
+ * Scroll to the next input that needs to be filled
+ */
+function scrollToNextInput() {
+    // Check rating order
+    const ratingOrder = ['quality', 'service', 'atmosphere', 'value'];
+
+    // If overall is not set, don't scroll (user is still on hero)
+    if (state.ratings.overall === 0) return;
+
+    // Find next unrated category
+    for (const category of ratingOrder) {
+        if (state.ratings[category] === 0) {
+            const nextItem = document.querySelector(`.rating-list-item[data-category="${category}"]`);
+            if (nextItem) {
+                scrollToElement(nextItem, 120);
+            }
+            return;
+        }
+    }
+
+    // All ratings set, scroll to menu if not selected
+    if (state.selectedMenu === '') {
+        const menuSection = document.querySelector('.menu-selection');
+        if (menuSection) {
+            scrollToElement(menuSection, 100);
+        }
+        return;
+    }
+
+    // Everything filled, scroll to next button
+    const nextBtn = document.getElementById('nextToStep2');
+    if (nextBtn) {
+        scrollToElement(nextBtn, 150);
+    }
 }
 
 /**
@@ -563,6 +610,44 @@ function initializeEventListeners() {
 // Step Navigation
 // =====================================================
 
+/**
+ * Smooth scroll to element with offset
+ */
+function scrollToElement(element, offset = 20) {
+    if (!element) return;
+
+    const elementRect = element.getBoundingClientRect();
+    const absoluteElementTop = elementRect.top + window.pageYOffset;
+    const targetPosition = absoluteElementTop - offset;
+
+    window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+    });
+}
+
+/**
+ * Auto-scroll to next action area based on step
+ */
+function autoScrollForStep(step) {
+    setTimeout(() => {
+        if (step === 4) {
+            // Step 4: Scroll to copy button area
+            const copyBtn = document.getElementById('copyBtnContainer');
+            if (copyBtn) {
+                scrollToElement(copyBtn, 100);
+            }
+        } else {
+            // Other steps: Scroll to section title
+            const activeSection = document.querySelector('.step-section.active');
+            if (activeSection) {
+                const title = activeSection.querySelector('.section-title');
+                scrollToElement(title || activeSection, 80);
+            }
+        }
+    }, 100);
+}
+
 function goToStep(step) {
     state.currentStep = step;
 
@@ -587,8 +672,8 @@ function goToStep(step) {
         updatePreview();
     }
 
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Auto-scroll to relevant content
+    autoScrollForStep(step);
 }
 
 function setupStep2() {

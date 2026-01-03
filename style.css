@@ -664,13 +664,26 @@ body {
     box-shadow: none !important;
 }
 
-/* Primary CTA - 3D Effect */
+/* Primary CTA - Luxury Gold 3D Effect */
 .btn-primary {
-    background: var(--gradient-gold-3d);
-    color: var(--white);
-    box-shadow: var(--shadow-btn-3d);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    background: linear-gradient(180deg,
+        #E8D5A3 0%,
+        #D4B896 15%,
+        #C9A86C 50%,
+        #B8944A 85%,
+        #A07D35 100%);
+    color: #3D2E1C;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.4) inset,
+        0 -2px 4px rgba(0,0,0,0.1) inset,
+        0 4px 0 #8B6914,
+        0 6px 8px rgba(0,0,0,0.25),
+        0 10px 20px rgba(139,105,20,0.3);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
     transform: translateY(0);
+    border: 1px solid rgba(255,255,255,0.2);
+    font-weight: 700;
+    letter-spacing: 0.02em;
 }
 
 .btn-primary::before {
@@ -680,7 +693,7 @@ body {
     left: 0;
     right: 0;
     height: 50%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent);
+    background: linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.05));
     border-radius: var(--radius-md) var(--radius-md) 0 0;
     pointer-events: none;
 }
@@ -688,13 +701,20 @@ body {
 .btn-primary:not(:disabled):hover {
     transform: translateY(-2px);
     box-shadow:
-        0 6px 0 #A8895D,
-        0 10px 20px rgba(0,0,0,0.25);
+        0 1px 0 rgba(255,255,255,0.4) inset,
+        0 -2px 4px rgba(0,0,0,0.1) inset,
+        0 6px 0 #8B6914,
+        0 8px 12px rgba(0,0,0,0.3),
+        0 14px 28px rgba(139,105,20,0.4);
 }
 
 .btn-primary:not(:disabled):active {
     transform: translateY(2px);
-    box-shadow: var(--shadow-btn-3d-active);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.4) inset,
+        0 -2px 4px rgba(0,0,0,0.1) inset,
+        0 2px 0 #8B6914,
+        0 3px 6px rgba(0,0,0,0.2);
 }
 
 /* Outline */
@@ -766,12 +786,25 @@ body {
     height: 18px;
 }
 
-/* Hotpepper - 3D Effect */
+/* Hotpepper - Luxury Gold 3D Effect */
 .btn-hotpepper {
-    background: var(--gradient-gold-3d);
-    color: var(--white);
-    box-shadow: var(--shadow-btn-3d);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    background: linear-gradient(180deg,
+        #E8D5A3 0%,
+        #D4B896 15%,
+        #C9A86C 50%,
+        #B8944A 85%,
+        #A07D35 100%);
+    color: #3D2E1C;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.4) inset,
+        0 -2px 4px rgba(0,0,0,0.1) inset,
+        0 4px 0 #8B6914,
+        0 6px 8px rgba(0,0,0,0.25),
+        0 10px 20px rgba(139,105,20,0.3);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
+    font-weight: 700;
+    letter-spacing: 0.02em;
 }
 
 .btn-hotpepper::before {
@@ -781,7 +814,7 @@ body {
     left: 0;
     right: 0;
     height: 50%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent);
+    background: linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.05));
     border-radius: var(--radius-md) var(--radius-md) 0 0;
     pointer-events: none;
 }
@@ -789,13 +822,20 @@ body {
 .btn-hotpepper:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 6px 0 #A8895D,
-        0 10px 20px rgba(0,0,0,0.25);
+        0 1px 0 rgba(255,255,255,0.4) inset,
+        0 -2px 4px rgba(0,0,0,0.1) inset,
+        0 6px 0 #8B6914,
+        0 8px 12px rgba(0,0,0,0.3),
+        0 14px 28px rgba(139,105,20,0.4);
 }
 
 .btn-hotpepper:active {
     transform: translateY(2px);
-    box-shadow: var(--shadow-btn-3d-active);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.4) inset,
+        0 -2px 4px rgba(0,0,0,0.1) inset,
+        0 2px 0 #8B6914,
+        0 3px 6px rgba(0,0,0,0.2);
 }
 
 .hotpepper-icon {
