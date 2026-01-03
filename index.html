@@ -361,16 +361,6 @@
                 口コミを投稿
             </h2>
 
-            <!-- Clear Guidance for Next Action -->
-            <div class="step4-guidance">
-                <div class="step4-guidance-icon">📋</div>
-                <p class="step4-guidance-text">
-                    まず「口コミをコピー」してから<br>
-                    Hot Pepper Beautyで投稿してください
-                </p>
-                <div class="step4-guidance-arrow">↓</div>
-            </div>
-
             <div class="review-preview">
                 <div class="preview-header">
                     <span class="preview-label">投稿する口コミ</span>
@@ -381,10 +371,13 @@
                 </div>
             </div>
 
-            <button class="btn btn-copy" id="copyReviewBtn">
-                <span class="btn-icon" aria-hidden="true">⎘</span>
-                口コミをコピー
-            </button>
+            <div class="btn-with-badge" id="copyBtnContainer">
+                <span class="press-here-badge" id="copyBadge">① まずここをタップ</span>
+                <button class="btn btn-copy" id="copyReviewBtn">
+                    <span class="btn-icon" aria-hidden="true">⎘</span>
+                    口コミをコピー
+                </button>
+            </div>
 
             <!-- Hotpepper Beauty (Primary) -->
             <div class="review-platform-section primary">
@@ -398,24 +391,27 @@
                         <li>ログインして口コミを投稿</li>
                     </ol>
                 </div>
-                <a href="#"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   class="btn btn-hotpepper"
-                   id="hotpepperReviewBtn">
-                    <svg class="hotpepper-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                        <defs>
-                            <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#EFE0BC"/>
-                                <stop offset="50%" style="stop-color:#D4B896"/>
-                                <stop offset="100%" style="stop-color:#A8895D"/>
-                            </linearGradient>
-                        </defs>
-                        <circle cx="12" cy="12" r="10" fill="white" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
-                        <path d="M12 6L13.5 10.5H18L14.25 13.5L15.75 18L12 15L8.25 18L9.75 13.5L6 10.5H10.5L12 6Z" fill="url(#goldGradient)"/>
-                    </svg>
-                    Hot Pepper Beautyで口コミ投稿
-                </a>
+                <div class="btn-with-badge" id="hotpepperBtnContainer">
+                    <span class="press-here-badge hidden" id="hotpepperBadge">② 次にここをタップ</span>
+                    <a href="#"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="btn btn-hotpepper"
+                       id="hotpepperReviewBtn">
+                        <svg class="hotpepper-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                            <defs>
+                                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#EFE0BC"/>
+                                    <stop offset="50%" style="stop-color:#D4B896"/>
+                                    <stop offset="100%" style="stop-color:#A8895D"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="12" cy="12" r="10" fill="white" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                            <path d="M12 6L13.5 10.5H18L14.25 13.5L15.75 18L12 15L8.25 18L9.75 13.5L6 10.5H10.5L12 6Z" fill="url(#goldGradient)"/>
+                        </svg>
+                        Hot Pepper Beautyで口コミ投稿
+                    </a>
+                </div>
             </div>
 
             <!-- Google (Secondary) -->

@@ -1120,34 +1120,59 @@ body {
    Platform Sections - Step 4 with Clear Guidance
    ===================================================== */
 
-.step4-guidance {
-    background: linear-gradient(180deg, var(--gold-100) 0%, var(--gold-50) 100%);
-    border: 2px solid var(--gold-400);
-    border-radius: var(--radius-lg);
-    padding: var(--space-md);
-    margin-bottom: var(--space-lg);
+/* Button with Badge Container */
+.btn-with-badge {
+    position: relative;
+    width: 100%;
+    margin-bottom: var(--space-md);
+}
+
+.btn-with-badge .btn {
+    margin-bottom: 0;
+}
+
+/* Press Here Badge */
+.press-here-badge {
+    display: block;
+    background: linear-gradient(145deg, #FF6B6B 0%, #E63946 100%);
+    color: var(--white);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
     text-align: center;
-}
-
-.step4-guidance-icon {
-    font-size: 1.5rem;
     margin-bottom: var(--space-sm);
+    box-shadow: 0 2px 8px rgba(230, 57, 70, 0.4);
+    animation: badge-pulse 1.5s ease-in-out infinite;
+    letter-spacing: 0.05em;
 }
 
-.step4-guidance-text {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--gold-800);
-    line-height: 1.5;
+.press-here-badge.hidden {
+    display: none;
 }
 
-.step4-guidance-arrow {
-    font-size: 1.25rem;
-    color: var(--gold-600);
-    animation: bounce 1s infinite;
-    margin-top: var(--space-sm);
+.press-here-badge.completed {
+    background: linear-gradient(145deg, #2ECC71 0%, #27AE60 100%);
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.4);
+    animation: none;
 }
 
+.press-here-badge.completed::before {
+    content: '✓ ';
+}
+
+@keyframes badge-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(230, 57, 70, 0.4);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(230, 57, 70, 0.6);
+    }
+}
+
+/* Bounce animation for arrows */
 @keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(4px); }

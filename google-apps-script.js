@@ -332,14 +332,21 @@ function createReviewPrompt(data) {
   ];
   const randomCharRange = charRanges[Math.floor(Math.random() * charRanges.length)];
 
-  // 良かったポイントのセクション
+  // 良かったポイントのセクション（最重要）
   let goodPointsSection = '';
   if (goodPoints) {
+    const pointsList = goodPoints.split(',').map(p => '- ' + p.trim()).join('\n');
     goodPointsSection = `
-【お客様が良かったと感じた点】
-${goodPoints.split(',').map(p => '- ' + p.trim()).join('\n')}
 
-これらの良かった点を口コミに自然に盛り込んでください。`;
+★★★【最重要】お客様が良かったと感じた点★★★
+${pointsList}
+
+【重要な指示】
+上記の「良かった点」は、お客様が実際に選択した内容です。
+口コミの中で、これらの良かった点を【必ず具体的に言及】してください。
+例えば「仕上がりがきれい」が選ばれていれば、仕上がりについて詳しく書いてください。
+「スタッフの対応が良い」が選ばれていれば、接客について触れてください。
+良かった点は口コミの中心的な内容として扱い、自然な形で強調してください。`;
   }
 
   // 文字数のバリエーション（100〜400文字）

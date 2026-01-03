@@ -915,6 +915,7 @@ async function copyReviewToClipboard() {
     try {
         await navigator.clipboard.writeText(state.editedReview);
         showToast('口コミをコピーしました');
+        updateBadgesAfterCopy();
     } catch (error) {
         // Fallback for older browsers
         const textArea = document.createElement('textarea');
@@ -927,11 +928,30 @@ async function copyReviewToClipboard() {
         try {
             document.execCommand('copy');
             showToast('口コミをコピーしました');
+            updateBadgesAfterCopy();
         } catch (err) {
             showToast('コピーに失敗しました');
         }
 
         document.body.removeChild(textArea);
+    }
+}
+
+/**
+ * Update badges after copy button is clicked
+ */
+function updateBadgesAfterCopy() {
+    // Mark copy badge as completed
+    const copyBadge = document.getElementById('copyBadge');
+    if (copyBadge) {
+        copyBadge.textContent = 'コピー完了';
+        copyBadge.classList.add('completed');
+    }
+
+    // Show hotpepper badge
+    const hotpepperBadge = document.getElementById('hotpepperBadge');
+    if (hotpepperBadge) {
+        hotpepperBadge.classList.remove('hidden');
     }
 }
 
