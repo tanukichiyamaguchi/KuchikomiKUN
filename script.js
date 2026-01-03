@@ -944,7 +944,7 @@ function updateBadgesAfterCopy() {
     // Mark copy badge as completed
     const copyBadge = document.getElementById('copyBadge');
     if (copyBadge) {
-        copyBadge.textContent = 'コピー完了';
+        copyBadge.textContent = 'コピー完了！';
         copyBadge.classList.add('completed');
     }
 
