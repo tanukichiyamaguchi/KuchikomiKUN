@@ -1125,47 +1125,36 @@ body {
     position: relative;
     width: 100%;
     margin-bottom: var(--space-md);
-    padding-top: var(--space-md);
 }
 
 .btn-with-badge .btn {
     margin-bottom: 0;
 }
 
-/* Press Here Badge - Overlay Style */
+/* Press Here Badge - Top Right Style */
 .press-here-badge {
     position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: -8px;
+    right: -8px;
     z-index: 10;
     background: linear-gradient(145deg, #FF6B6B 0%, #E63946 100%);
     color: var(--white);
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    padding: 6px var(--space-md);
+    padding: 5px 10px;
     border-radius: var(--radius-full);
     text-align: center;
     white-space: nowrap;
     box-shadow:
         0 4px 12px rgba(230, 57, 70, 0.5),
         0 2px 4px rgba(0, 0, 0, 0.2);
-    animation: badge-bounce 1s ease-in-out infinite;
-    letter-spacing: 0.05em;
+    animation: badge-pulse 1.2s ease-in-out infinite;
+    letter-spacing: 0.03em;
     border: 2px solid var(--white);
 }
 
 .press-here-badge::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid #E63946;
+    display: none;
 }
 
 .press-here-badge.hidden {
@@ -1188,12 +1177,18 @@ body {
     content: '✓ ';
 }
 
-@keyframes badge-bounce {
+@keyframes badge-pulse {
     0%, 100% {
-        transform: translateX(-50%) translateY(0);
+        transform: scale(1);
+        box-shadow:
+            0 4px 12px rgba(230, 57, 70, 0.5),
+            0 2px 4px rgba(0, 0, 0, 0.2);
     }
     50% {
-        transform: translateX(-50%) translateY(-4px);
+        transform: scale(1.08);
+        box-shadow:
+            0 6px 16px rgba(230, 57, 70, 0.7),
+            0 3px 6px rgba(0, 0, 0, 0.3);
     }
 }
 
