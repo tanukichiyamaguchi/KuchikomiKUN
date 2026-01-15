@@ -106,7 +106,8 @@ function doGet(e) {
           service: parseInt(e.parameter.service) || 3,
           atmosphere: parseInt(e.parameter.atmosphere) || 3,
           value: parseInt(e.parameter.value) || 3,
-          goodPoints: e.parameter.goodPoints || ''
+          goodPoints: e.parameter.goodPoints || '',
+          reviewLength: e.parameter.reviewLength || 'medium'
         };
         result = generateReviewWithAI(data);
         break;
@@ -298,39 +299,25 @@ function createReviewPrompt(data) {
   const atmosphere = safeData.atmosphere || overall;
   const value = safeData.value || overall;
   const goodPoints = safeData.goodPoints || '';
+  const reviewLength = safeData.reviewLength || 'medium';
 
-  // 評価に応じたトーン設定
-  let tone = '';
-  if (overall >= 5) {
-    tone = '大変満足した体験として、積極的に褒める内容';
-  } else if (overall >= 4) {
-    tone = '満足した体験として、良かった点を具体的に挙げる内容';
-  } else if (overall >= 3) {
-    tone = '普通の体験として、淡々と感想を述べる内容';
-  } else {
-    tone = '改善を期待する控えめな内容';
+  // サロン名
+  const salonName = 'KATE stage LASH(ケイトステージラッシュ)蒲田西口店';
+
+  // 文字数設定（ユーザー選択に基づく）
+  let charInstruction = '';
+  switch (reviewLength) {
+    case 'short':
+      charInstruction = '80〜150文字程度（簡潔に要点のみ）';
+      break;
+    case 'long':
+      charInstruction = '300〜500文字程度（詳しく丁寧に）';
+      break;
+    case 'medium':
+    default:
+      charInstruction = '150〜250文字程度（標準的な長さ）';
+      break;
   }
-
-  // 文体のバリエーション
-  const writingStyles = [
-    '丁寧で礼儀正しい敬語調（「〜でした」「〜いただきました」）',
-    'カジュアルでフレンドリーな口調（「〜だった」「〜してくれた」）',
-    '熱烈で感動を込めた表現（「本当に」「すごく」などの強調）',
-    '冷静で客観的な評価スタイル（事実を淡々と述べる）',
-    '親しみやすい話し言葉調（「〜なんです」「〜ですよね」）',
-    '簡潔でシンプルな表現（短文中心）',
-    '詳細で説明的な文体（具体的な描写を含む）'
-  ];
-  const randomStyle = writingStyles[Math.floor(Math.random() * writingStyles.length)];
-
-  // 文字数のバリエーション（100〜300文字）
-  const charRanges = [
-    { min: 100, max: 150, desc: '100〜150文字程度（簡潔に）' },
-    { min: 150, max: 200, desc: '150〜200文字程度（標準的）' },
-    { min: 200, max: 250, desc: '200〜250文字程度（やや詳しく）' },
-    { min: 250, max: 300, desc: '250〜300文字程度（詳細に）' }
-  ];
-  const randomCharRange = charRanges[Math.floor(Math.random() * charRanges.length)];
 
   // 良かったポイントのセクション（最重要）
   let goodPointsSection = '';
@@ -349,36 +336,84 @@ ${pointsList}
 良かった点は口コミの中心的な内容として扱い、自然な形で強調してください。`;
   }
 
-  // 文字数のバリエーション（100〜400文字）
-  const charVariations = [
-    '100〜150文字程度（短めに簡潔に）',
-    '150〜200文字程度（標準的な長さ）',
-    '200〜280文字程度（やや詳しく）',
-    '280〜350文字程度（詳細に）',
-    '350〜400文字程度（しっかり書く）'
+  // 文体パターン（大幅に多様化）
+  const writingPatterns = [
+    {
+      style: '丁寧な敬語調',
+      example: '〜でした、〜いただきました、〜させていただきました',
+      characteristics: '礼儀正しく、感謝の気持ちを込めた表現'
+    },
+    {
+      style: 'カジュアルな口語調',
+      example: '〜だった、〜してくれた、〜で良かった',
+      characteristics: '友達に話すような気軽な表現'
+    },
+    {
+      style: '感情豊かな表現',
+      example: '本当に〜、すごく〜、めっちゃ〜',
+      characteristics: '喜びや感動を素直に表現'
+    },
+    {
+      style: '冷静で客観的な評価',
+      example: '〜と思います、〜という印象、〜でした',
+      characteristics: '事実を淡々と述べるスタイル'
+    },
+    {
+      style: '親しみやすい話し言葉',
+      example: '〜なんです、〜ですよね、〜かな',
+      characteristics: '読み手に語りかけるような表現'
+    },
+    {
+      style: 'シンプルで短文中心',
+      example: '短い文で簡潔に。ポイントを絞って。',
+      characteristics: '無駄のない簡潔な表現'
+    },
+    {
+      style: '詳細な描写重視',
+      example: '具体的なエピソードや状況を詳しく',
+      characteristics: '読み手がイメージしやすい描写'
+    },
+    {
+      style: '比較・対比を含む',
+      example: '他店と比べて〜、以前は〜だったけど',
+      characteristics: '経験に基づく比較表現'
+    },
+    {
+      style: '質問形を交えた語り',
+      example: '〜って思いませんか？、〜じゃないですか',
+      characteristics: '読み手を巻き込む表現'
+    },
+    {
+      style: '時系列で体験を語る',
+      example: '最初に〜、その後〜、最後に〜',
+      characteristics: '体験の流れを順を追って説明'
+    }
   ];
-  const randomCharDesc = charVariations[Math.floor(Math.random() * charVariations.length)];
+  const selectedPattern = writingPatterns[Math.floor(Math.random() * writingPatterns.length)];
 
-  // 文体・トーンのバリエーション
-  const toneStyles = [
-    '丁寧な敬語調（「〜でした」「〜いただきました」）',
-    'カジュアルな口調（「〜だった」「〜してくれた」「〜だよね」）',
-    '淡々とした事実ベースの文体',
-    '親しみやすい話し言葉（「〜なんです」「〜ですよ」）',
-    'シンプルで短文中心',
-    '少し詳しめの説明調'
+  // 書き出しパターン
+  const openingPatterns = [
+    '${salonName}に行ってきました。',
+    '蒲田駅西口にある${salonName}を利用しました。',
+    '友人のおすすめで${salonName}に初めて行きました。',
+    '${salonName}でお世話になりました。',
+    '前から気になっていた${salonName}にやっと行けました。',
+    'ネットで見つけた${salonName}に予約を入れました。',
+    '${salonName}でリピートしています。',
+    '蒲田で${menu}ができるお店を探していて${salonName}を見つけました。'
   ];
-  const randomToneStyle = toneStyles[Math.floor(Math.random() * toneStyles.length)];
+  const useOpeningWithSalon = Math.random() < 0.7; // 70%の確率でサロン名入りの書き出し
 
   // 絵文字使用の有無
-  const useEmoji = Math.random() < 0.3; // 30%の確率で絵文字使用
+  const useEmoji = Math.random() < 0.25; // 25%の確率で絵文字使用
   const emojiInstruction = useEmoji
-    ? '適度に絵文字を使ってください（1〜3個程度、使いすぎない）'
+    ? '適度に絵文字を使ってください（1〜2個程度、使いすぎない）'
     : '絵文字は使用しないでください';
 
-  return `あなたは蒲田にある眉毛まつ毛サロンに実際に通っている一般のお客様です。
-Googleマップに投稿する自然な口コミを作成してください。
+  return `あなたは蒲田にある眉毛まつ毛サロン「${salonName}」に実際に通っている一般のお客様です。
+Googleマップまたは口コミサイトに投稿する自然な口コミを作成してください。
 
+【サロン名】${salonName}
 【施術メニュー】${menu}
 
 【お客様の満足度】
@@ -389,22 +424,24 @@ Googleマップに投稿する自然な口コミを作成してください。
 - コスパ: ${value}/5点
 ${goodPointsSection}
 
-【今回の文体・トーン】${randomToneStyle}
-【文字数】${randomCharDesc}
+【今回の文体】
+- スタイル: ${selectedPattern.style}
+- 表現例: ${selectedPattern.example}
+- 特徴: ${selectedPattern.characteristics}
+
+【文字数】${charInstruction}
 
 【重要なルール】
-1. 以下のSEOキーワードから1〜5個を自然な文脈で含めてください：
-   - 眉毛関連: 眉毛、まゆ毛、アイブロウ、眉毛サロン、眉毛スタイリング、眉デザイン
-   - まつ毛関連: まつ毛、まつげ、まつ毛パーマ、まつげパーマ、パリジェンヌ、ラッシュリフト、まつ毛サロン、眉毛まつ毛サロン
-   - 施術関連: 仕上がり、デザイン、カウンセリング、技術
-   - 場所関連: 蒲田、大田区、蒲田駅西口から徒歩2分、蒲田駅から徒歩3分
-
-2. 絶対にAIが書いたとばれないような自然な文章にしてください
-3. 実際に体験したかのような具体的でリアルな表現を使ってください
-4. 大げさな表現や過度な褒め言葉は避け、自然体で書いてください
-5. ${emojiInstruction}
-6. 口コミ本文のみを出力してください（「口コミ:」などの前置きは不要）
-7. 毎回異なる視点・表現で書いてください
+1. サロン名「${salonName}」または「ケイトステージラッシュ」を口コミ内で必ず1回は言及してください
+2. 以下のSEOキーワードから2〜4個を自然な文脈で含めてください：
+   - 眉毛関連: 眉毛、まゆ毛、アイブロウ、眉毛サロン、眉デザイン
+   - まつ毛関連: まつ毛、まつげ、まつ毛パーマ、まつげパーマ、パリジェンヌ、ラッシュリフト
+   - 場所関連: 蒲田、蒲田駅西口、大田区
+3. 絶対にAIが書いたとばれないような自然な文章にしてください
+4. 実際に体験したかのような具体的でリアルな表現を使ってください
+5. 同じような文章にならないよう、毎回異なる視点・表現で書いてください
+6. ${emojiInstruction}
+7. 口コミ本文のみを出力してください（「口コミ:」などの前置きは不要）
 
 口コミを1つだけ生成：`;
 }

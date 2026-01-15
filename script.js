@@ -38,7 +38,8 @@ const state = {
     improvement: '',          // 改善希望
     generatedReview: '',
     editedReview: '',
-    isLowRating: false        // 星2以下かどうか
+    isLowRating: false,       // 星2以下かどうか
+    reviewLength: 'medium'    // 口コミ文字量（short/medium/long）
 };
 
 // =====================================================
@@ -148,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeStarRatings();
     initializeEventListeners();
     initializeSelectionButtons();
+    initializeReviewLengthButtons();
     initializeReviewLinks();
     updateProgress();
     // Initialize active states on load
@@ -524,6 +526,25 @@ function toggleSelection(btn, stateKey) {
     }
 
     validateStep2();
+}
+
+/**
+ * Initialize review length buttons
+ */
+function initializeReviewLengthButtons() {
+    const reviewLengthButtons = document.getElementById('reviewLengthButtons');
+    if (!reviewLengthButtons) return;
+
+    reviewLengthButtons.querySelectorAll('.length-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 単一選択: 他のボタンを解除
+            reviewLengthButtons.querySelectorAll('.length-btn').forEach(b => {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+            state.reviewLength = btn.dataset.value;
+        });
+    });
 }
 
 // =====================================================
@@ -971,7 +992,7 @@ function generateReviewWithGAS() {
             }
         };
 
-        // URLパラメータを構築（良かったポイントを含める）
+        // URLパラメータを構築（良かったポイント、文字量を含める）
         const params = new URLSearchParams({
             callback: callbackName,
             action: 'generate',
@@ -981,7 +1002,8 @@ function generateReviewWithGAS() {
             service: state.ratings.service,
             atmosphere: state.ratings.atmosphere,
             value: state.ratings.value,
-            goodPoints: state.goodPoints.join(',')
+            goodPoints: state.goodPoints.join(','),
+            reviewLength: state.reviewLength
         });
 
         // scriptタグを作成してJSONPリクエスト
