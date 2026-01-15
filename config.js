@@ -8,7 +8,7 @@
 window.CONFIG = {
     // Google Apps Script Web App URL
     // GASをデプロイ後、ここにURLを設定してください
-    GAS_URL: 'https://script.google.com/macros/s/AKfycbxCtRB9pp4mf-wMLqrJFnAoCxAcO48AYvg4MoKxtDUKNKcUj2KBDMEpQ2LgnlikA976aQ/exec',
+    GAS_URL: 'https://script.google.com/macros/s/AKfycbz_v-ryvOez8fxin6WSaCRTLhGjcYo_pQ4LlZWENu1StBni9P2ruxM1gqdQrni1ZxFZ/exec',
 
     // Hot Pepper Beauty Review URL (Primary)
     // サロンのHot Pepper Beauty口コミ投稿ページURLを設定してください
