@@ -21,6 +21,6 @@ window.CONFIG = {
     SALON_NAME: 'KATEstageLASH 蒲田西口店',
 
     // Review Settings
-    MAX_CHARS: 500,
-    MIN_CHARS: 50
+    MAX_CHARS: 10000,  // 実質無制限
+    MIN_CHARS: 30
 };
