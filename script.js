@@ -39,7 +39,8 @@ const state = {
     generatedReview: '',
     editedReview: '',
     isLowRating: false,       // 星2以下かどうか
-    reviewLength: 'medium'    // 口コミ文字量（short/medium/long）
+    reviewLength: 'medium',   // 口コミ文字量（short/medium/long）
+    writingStyle: 'polite'    // 口コミ文体（polite/casual/emotional/objective/friendly/simple）
 };
 
 // =====================================================
@@ -150,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     initializeSelectionButtons();
     initializeReviewLengthButtons();
+    initializeWritingStyleButtons();
     initializeReviewLinks();
     updateProgress();
     // Initialize active states on load
@@ -543,6 +545,25 @@ function initializeReviewLengthButtons() {
             });
             btn.classList.add('selected');
             state.reviewLength = btn.dataset.value;
+        });
+    });
+}
+
+/**
+ * Initialize writing style buttons
+ */
+function initializeWritingStyleButtons() {
+    const writingStyleButtons = document.getElementById('writingStyleButtons');
+    if (!writingStyleButtons) return;
+
+    writingStyleButtons.querySelectorAll('.style-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 単一選択: 他のボタンを解除
+            writingStyleButtons.querySelectorAll('.style-btn').forEach(b => {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+            state.writingStyle = btn.dataset.value;
         });
     });
 }
@@ -992,7 +1013,7 @@ function generateReviewWithGAS() {
             }
         };
 
-        // URLパラメータを構築（良かったポイント、文字量を含める）
+        // URLパラメータを構築（良かったポイント、文字量、文体を含める）
         const params = new URLSearchParams({
             callback: callbackName,
             action: 'generate',
@@ -1003,7 +1024,8 @@ function generateReviewWithGAS() {
             atmosphere: state.ratings.atmosphere,
             value: state.ratings.value,
             goodPoints: state.goodPoints.join(','),
-            reviewLength: state.reviewLength
+            reviewLength: state.reviewLength,
+            writingStyle: state.writingStyle
         });
 
         // scriptタグを作成してJSONPリクエスト

@@ -107,7 +107,8 @@ function doGet(e) {
           atmosphere: parseInt(e.parameter.atmosphere) || 3,
           value: parseInt(e.parameter.value) || 3,
           goodPoints: e.parameter.goodPoints || '',
-          reviewLength: e.parameter.reviewLength || 'medium'
+          reviewLength: e.parameter.reviewLength || 'medium',
+          writingStyle: e.parameter.writingStyle || 'polite'
         };
         result = generateReviewWithAI(data);
         break;
@@ -285,7 +286,7 @@ function generateReviewWithAI(data) {
 }
 
 /**
- * AIプロンプトを作成（SEO対策ワード含む、様々な文体対応）
+ * AIプロンプトを作成（SEO対策ワード含む、ユーザー選択の文体対応）
  * @param {Object} data - 評価データ
  * @returns {string} - プロンプト
  */
@@ -300,6 +301,7 @@ function createReviewPrompt(data) {
   const value = safeData.value || overall;
   const goodPoints = safeData.goodPoints || '';
   const reviewLength = safeData.reviewLength || 'medium';
+  const writingStyle = safeData.writingStyle || 'polite';
 
   // サロン名
   const salonName = 'KATE stage LASH(ケイトステージラッシュ)蒲田西口店';
@@ -336,73 +338,42 @@ ${pointsList}
 良かった点は口コミの中心的な内容として扱い、自然な形で強調してください。`;
   }
 
-  // 文体パターン（大幅に多様化）
-  const writingPatterns = [
-    {
+  // 文体パターン（6種類 - ユーザーが選択）
+  const writingPatterns = {
+    polite: {
       style: '丁寧な敬語調',
       example: '〜でした、〜いただきました、〜させていただきました',
-      characteristics: '礼儀正しく、感謝の気持ちを込めた表現'
+      characteristics: '礼儀正しく、感謝の気持ちを込めた表現。「ありがとうございました」など丁寧語を使用'
     },
-    {
+    casual: {
       style: 'カジュアルな口語調',
       example: '〜だった、〜してくれた、〜で良かった',
-      characteristics: '友達に話すような気軽な表現'
+      characteristics: '友達に話すような気軽な表現。堅苦しくない自然体の言葉遣い'
     },
-    {
+    emotional: {
       style: '感情豊かな表現',
-      example: '本当に〜、すごく〜、めっちゃ〜',
-      characteristics: '喜びや感動を素直に表現'
+      example: '本当に〜、すごく〜、めっちゃ嬉しい〜',
+      characteristics: '喜びや感動を素直に表現。感嘆詞やポジティブな形容詞を多用'
     },
-    {
+    objective: {
       style: '冷静で客観的な評価',
-      example: '〜と思います、〜という印象、〜でした',
-      characteristics: '事実を淡々と述べるスタイル'
+      example: '〜と思います、〜という印象でした、〜と感じました',
+      characteristics: '事実を淡々と述べるスタイル。主観的な感情表現は控えめに'
     },
-    {
+    friendly: {
       style: '親しみやすい話し言葉',
       example: '〜なんです、〜ですよね、〜かな',
-      characteristics: '読み手に語りかけるような表現'
+      characteristics: '読み手に語りかけるような表現。「〜おすすめです！」など親近感のある口調'
     },
-    {
+    simple: {
       style: 'シンプルで短文中心',
       example: '短い文で簡潔に。ポイントを絞って。',
-      characteristics: '無駄のない簡潔な表現'
-    },
-    {
-      style: '詳細な描写重視',
-      example: '具体的なエピソードや状況を詳しく',
-      characteristics: '読み手がイメージしやすい描写'
-    },
-    {
-      style: '比較・対比を含む',
-      example: '他店と比べて〜、以前は〜だったけど',
-      characteristics: '経験に基づく比較表現'
-    },
-    {
-      style: '質問形を交えた語り',
-      example: '〜って思いませんか？、〜じゃないですか',
-      characteristics: '読み手を巻き込む表現'
-    },
-    {
-      style: '時系列で体験を語る',
-      example: '最初に〜、その後〜、最後に〜',
-      characteristics: '体験の流れを順を追って説明'
+      characteristics: '無駄のない簡潔な表現。一文を短くし、要点を明確に'
     }
-  ];
-  const selectedPattern = writingPatterns[Math.floor(Math.random() * writingPatterns.length)];
+  };
 
-  // 書き出しパターン
-  const openingPatterns = [
-    '${salonName}に行ってきました。',
-    '蒲田駅西口にある${salonName}を利用しました。',
-    '友人のおすすめで${salonName}に初めて行きました。',
-    '${salonName}でお世話になりました。',
-    '前から気になっていた${salonName}にやっと行けました。',
-    'ネットで見つけた${salonName}に予約を入れました。',
-    '${salonName}でリピートしています。',
-    '蒲田で${menu}ができるお店を探していて${salonName}を見つけました。'
-  ];
-  const useOpeningWithSalon = Math.random() < 0.7; // 70%の確率でサロン名入りの書き出し
+  // ユーザーが選択した文体を取得
+  const selectedPattern = writingPatterns[writingStyle] || writingPatterns.polite;
 
   // 絵文字使用の有無
   const useEmoji = Math.random() < 0.25; // 25%の確率で絵文字使用
@@ -424,7 +395,7 @@ Googleマップまたは口コミサイトに投稿する自然な口コミを�
 - コスパ: ${value}/5点
 ${goodPointsSection}
 
-【今回の文体】
+【今回の文体】★お客様が選んだ文体です。必ずこの文体で書いてください★
 - スタイル: ${selectedPattern.style}
 - 表現例: ${selectedPattern.example}
 - 特徴: ${selectedPattern.characteristics}
@@ -439,7 +410,7 @@ ${goodPointsSection}
    - 場所関連: 蒲田、蒲田駅西口、大田区
 3. 絶対にAIが書いたとばれないような自然な文章にしてください
 4. 実際に体験したかのような具体的でリアルな表現を使ってください
-5. 同じような文章にならないよう、毎回異なる視点・表現で書いてください
+5. 選択された「${selectedPattern.style}」の文体を厳守してください
 6. ${emojiInstruction}
 7. 口コミ本文のみを出力してください（「口コミ:」などの前置きは不要）
 
