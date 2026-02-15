@@ -1105,22 +1105,22 @@ function updateBadgesAfterCopy() {
     // Remove glow from copy button
     elements.copyReviewBtn.classList.remove('glow');
 
-    // Show hotpepper badge and add glow to hotpepper button
-    const hotpepperBadge = document.getElementById('hotpepperBadge');
-    if (hotpepperBadge) {
-        hotpepperBadge.classList.remove('hidden');
+    // Show Google badge and add glow to Google button
+    const googleBadge = document.getElementById('googleBadge');
+    if (googleBadge) {
+        googleBadge.classList.remove('hidden');
     }
 
-    // Add glow to hotpepper button
-    if (elements.hotpepperReviewBtn) {
-        elements.hotpepperReviewBtn.classList.add('glow');
+    // Add glow to Google button
+    if (elements.googleReviewBtn) {
+        elements.googleReviewBtn.classList.add('glow');
     }
 
-    // Auto-scroll to hotpepper section
+    // Auto-scroll to Google section (primary)
     setTimeout(() => {
-        const hotpepperSection = document.querySelector('.review-platform-section.primary');
-        if (hotpepperSection) {
-            scrollToElement(hotpepperSection, 80);
+        const googleSection = document.querySelector('.review-platform-section.primary');
+        if (googleSection) {
+            scrollToElement(googleSection, 80);
         }
     }, 300);
 }
