@@ -813,7 +813,7 @@ body {
     }
 }
 
-/* Google */
+/* Google (Secondary - simple style) */
 .btn-google {
     background: var(--white);
     color: var(--gray-700);
@@ -828,12 +828,90 @@ body {
     }
 }
 
+/* Google (Primary - prominent 3D style) */
+.btn-google-primary {
+    background: linear-gradient(180deg,
+        #FFFFFF 0%,
+        #F8F9FA 10%,
+        #E8EAED 30%,
+        #DADCE0 50%,
+        #BDC1C6 70%,
+        #9AA0A6 100%);
+    color: var(--gray-800);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 -1px 3px rgba(0,0,0,0.08) inset,
+        0 4px 0 #80868B,
+        0 5px 8px rgba(0,0,0,0.15),
+        0 8px 16px rgba(66,133,244,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.btn-google-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 45%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0.1));
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    pointer-events: none;
+}
+
+.btn-google-primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 -1px 3px rgba(0,0,0,0.08) inset,
+        0 6px 0 #80868B,
+        0 8px 12px rgba(0,0,0,0.2),
+        0 12px 24px rgba(66,133,244,0.2);
+}
+
+.btn-google-primary:active {
+    transform: translateY(2px);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 -1px 3px rgba(0,0,0,0.08) inset,
+        0 2px 0 #80868B,
+        0 3px 6px rgba(0,0,0,0.15);
+}
+
+/* Glowing effect for Google primary when ready */
+.btn-google-primary.glow {
+    animation: btn-google-glow 2s ease-in-out infinite;
+}
+
+@keyframes btn-google-glow {
+    0%, 100% {
+        box-shadow:
+            0 1px 0 rgba(255,255,255,0.6) inset,
+            0 -1px 3px rgba(0,0,0,0.08) inset,
+            0 4px 0 #80868B,
+            0 5px 8px rgba(0,0,0,0.15),
+            0 8px 16px rgba(66,133,244,0.15);
+    }
+    50% {
+        box-shadow:
+            0 1px 0 rgba(255,255,255,0.6) inset,
+            0 -1px 3px rgba(0,0,0,0.08) inset,
+            0 4px 0 #80868B,
+            0 5px 8px rgba(0,0,0,0.15),
+            0 8px 16px rgba(66,133,244,0.15),
+            0 0 20px rgba(66,133,244,0.4),
+            0 0 40px rgba(66,133,244,0.2);
+    }
+}
+
 .google-icon {
     width: 18px;
     height: 18px;
 }
 
-/* Hotpepper - Refined Champagne Gold */
+/* Hotpepper - Refined Champagne Gold (Primary style) */
 .btn-hotpepper {
     background: linear-gradient(180deg,
         #F5ECD7 0%,
@@ -889,6 +967,26 @@ body {
 /* Glowing effect for Hotpepper when ready */
 .btn-hotpepper.glow {
     animation: btn-glow 2s ease-in-out infinite;
+}
+
+/* Hotpepper Secondary (simple style) */
+.btn-hotpepper-secondary {
+    background: var(--white);
+    color: var(--gray-700);
+    border: 2px solid var(--gold-300);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-hotpepper-secondary::before {
+    display: none;
+}
+
+@media (hover: hover) {
+    .btn-hotpepper-secondary:hover {
+        border-color: var(--gold-500);
+        background: var(--gold-50);
+        box-shadow: var(--shadow-md);
+    }
 }
 
 .hotpepper-icon {
@@ -1520,8 +1618,8 @@ body {
 }
 
 .review-platform-section.primary {
-    border-color: var(--gold-400);
-    background: linear-gradient(180deg, var(--gold-50) 0%, var(--white) 100%);
+    border-color: rgba(66, 133, 244, 0.4);
+    background: linear-gradient(180deg, #F0F4FF 0%, var(--white) 100%);
     position: relative;
 }
 
@@ -1532,19 +1630,19 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--gradient-gold);
+    background: linear-gradient(145deg, #4285F4, #34A853, #FBBC05, #EA4335);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 /* Pulse animation for primary button */
-.review-platform-section.primary .btn-hotpepper {
-    animation: pulse-gold 2s infinite;
+.review-platform-section.primary .btn-google-primary {
+    animation: pulse-google 2s infinite;
 }
 
-@keyframes pulse-gold {
-    0% { box-shadow: var(--shadow-btn-3d); }
-    50% { box-shadow: var(--shadow-btn-3d), 0 0 20px rgba(212, 184, 150, 0.4); }
-    100% { box-shadow: var(--shadow-btn-3d); }
+@keyframes pulse-google {
+    0% { box-shadow: 0 4px 0 #80868B, 0 5px 8px rgba(0,0,0,0.15); }
+    50% { box-shadow: 0 4px 0 #80868B, 0 5px 8px rgba(0,0,0,0.15), 0 0 20px rgba(66, 133, 244, 0.3); }
+    100% { box-shadow: 0 4px 0 #80868B, 0 5px 8px rgba(0,0,0,0.15); }
 }
 
 .platform-header {
