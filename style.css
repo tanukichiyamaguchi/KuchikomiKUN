@@ -1413,6 +1413,24 @@ body {
     color: var(--gray-500);
 }
 
+.loading-subtext {
+    font-size: 0.75rem;
+    color: var(--gray-400);
+    margin-top: var(--space-xs);
+}
+
+/* AI生成に失敗したときの案内 */
+.ai-error-message {
+    font-size: 0.8125rem;
+    color: var(--gray-700);
+    line-height: 1.6;
+    background: var(--gold-50);
+    border-left: 3px solid var(--gold-500);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
 .review-textarea {
     width: 100%;
     padding: var(--space-md);

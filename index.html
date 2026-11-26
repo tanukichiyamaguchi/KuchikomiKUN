@@ -371,8 +371,13 @@
 
                 <div class="loading-container" id="loadingContainer" role="status" aria-live="polite">
                     <div class="loading-spinner" aria-hidden="true"></div>
-                    <p class="loading-text">あなたにぴったりの口コミを作成中...</p>
+                    <p class="loading-text">AIが口コミ例を作成しています…</p>
+                    <p class="loading-subtext">文章を考えているため、30秒ほどかかる場合があります</p>
                 </div>
+
+                <p class="ai-error-message" id="aiErrorMessage" role="alert" style="display: none;">
+                    口コミ例を作成できませんでした。「もう一度作成する」をタップするか、ご自身でご記入ください。
+                </p>
 
                 <div class="review-editor" id="reviewEditor" style="display: none;">
                     <label for="reviewText" class="form-label">口コミ内容</label>
@@ -390,7 +395,7 @@
 
                 <button class="btn btn-secondary" id="regenerateBtn" style="display: none;">
                     <span class="btn-icon" aria-hidden="true">↻</span>
-                    別の口コミ例を見る
+                    <span id="regenerateLabel">別の口コミ例を見る</span>
                 </button>
             </div>
 

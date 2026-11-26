@@ -40,7 +40,10 @@ const state = {
     editedReview: '',
     isLowRating: false,       // 星2以下かどうか
     reviewLength: 'medium',   // 口コミ文字量（short/medium/long）
-    writingStyle: 'polite'    // 口コミ文体（polite/casual/emotional/objective/friendly/simple）
+    writingStyle: 'polite',   // 口コミ文体（polite/casual/emotional/objective/friendly/simple）
+    generationSeq: 0,         // AI生成リクエストの通し番号（古い応答を捨てるため）
+    pendingGenerationKey: '', // 生成中の入力内容
+    lastGenerationKey: ''     // 最後に生成できたときの入力内容
 };
 
 // =====================================================
@@ -87,12 +90,13 @@ const elements = {
     charCount: document.getElementById('charCount'),
     freeCharCount: document.getElementById('freeCharCount'),
     regenerateBtn: document.getElementById('regenerateBtn'),
+    regenerateLabel: document.getElementById('regenerateLabel'),
+    aiErrorMessage: document.getElementById('aiErrorMessage'),
     backToStep2: document.getElementById('backToStep2'),
     nextToStep4: document.getElementById('nextToStep4'),
 
     // Step 4 elements
     previewContent: document.getElementById('previewContent'),
-    previewStars: document.getElementById('previewStars'),
     copyReviewBtn: document.getElementById('copyReviewBtn'),
     googleReviewBtn: document.getElementById('googleReviewBtn'),
     backToStep3: document.getElementById('backToStep3'),
@@ -110,36 +114,6 @@ const ratingTexts = {
     3: '普通でした',
     4: '満足しています',
     5: '大変満足しています'
-};
-
-// =====================================================
-// Review Templates (Fallback when API is not available)
-// =====================================================
-
-const reviewTemplates = {
-    5: [
-        '初めて{menu}を体験しましたが、スタッフさんの丁寧なカウンセリングのおかげで、理想通りの仕上がりになりました。施術中もリラックスできる雰囲気で、あっという間に終わりました。仕上がりも持ちも最高で、友達にもおすすめしたいサロンです。',
-        '{menu}でお世話になりました。カウンセリングがとても丁寧で、私の希望をしっかり聞いてくださいました。技術力が高く、自然で美しい仕上がりに大満足です。店内も清潔感があり、また絶対リピートします。',
-        '今まで色々なサロンを試しましたが、ここが一番良かったです。{menu}の仕上がりが素晴らしく、毎朝のメイク時間が短縮されました。スタッフさんも親切で、価格以上の価値があると思います。'
-    ],
-    4: [
-        '{menu}を受けました。スタッフさんの対応も良く、仕上がりも綺麗で満足しています。駅からも近くて通いやすいので、また利用したいと思います。',
-        '丁寧なカウンセリングで安心してお任せできました。{menu}の仕上がりも良く、友人にも褒められました。次回も同じスタッフさんにお願いしたいです。',
-        '初めての来店でしたが、スタッフさんが親切に説明してくださり、リラックスして施術を受けられました。{menu}の仕上がりも満足です。'
-    ],
-    3: [
-        '{menu}を体験しました。スタッフさんの対応は丁寧で、仕上がりも悪くないと思います。また機会があれば利用したいです。',
-        '予約通りの時間で施術していただきました。{menu}の仕上がりは期待通りでした。普通に良いサロンだと思います。',
-        '{menu}で伺いました。カウンセリングもしっかりしていて、施術も丁寧でした。特に不満はありませんでした。'
-    ],
-    2: [
-        '{menu}を受けました。もう少しカウンセリングに時間をかけていただけると、より希望に近い仕上がりになったかもしれません。',
-        '施術自体は問題なかったのですが、思っていた仕上がりと少し違いました。次回はもっと詳しく希望を伝えてみようと思います。'
-    ],
-    1: [
-        '今回の{menu}は期待していた仕上がりではありませんでした。もう少しカウンセリングで希望を聞いていただきたかったです。',
-        '残念ながら今回は満足できる仕上がりではありませんでした。改善を期待しています。'
-    ]
 };
 
 // =====================================================
@@ -754,6 +728,19 @@ function setupStep3() {
         // 星3以上: AI生成
         elements.aiReviewSection.style.display = 'block';
         elements.freeReviewSection.style.display = 'none';
+
+        const generationKey = getGenerationKey();
+        if (state.pendingGenerationKey === generationKey) {
+            // 同じ内容で生成中なので、そのまま完了を待つ
+            return;
+        }
+        if (state.generatedReview && state.lastGenerationKey === generationKey) {
+            // 入力内容が前回と同じなら再生成しない（「戻る」で編集内容が消えないように）
+            state.editedReview = elements.reviewText.value;
+            updateCharCount();
+            validateStep3();
+            return;
+        }
         generateReview();
     }
 }
@@ -925,53 +912,65 @@ function updateFreeCharCount() {
 // Review Generation (GAS経由でAI生成 - JSONP方式)
 // =====================================================
 
+/**
+ * 生成に使う入力内容をまとめたキー（同じ内容なら再生成しないために使う）
+ */
+function getGenerationKey() {
+    return JSON.stringify([
+        state.selectedMenu,
+        state.ratings,
+        state.goodPoints,
+        state.reviewLength,
+        state.writingStyle
+    ]);
+}
+
 async function generateReview() {
-    // Show loading
+    const requestId = ++state.generationSeq;
+    const generationKey = getGenerationKey();
+    state.pendingGenerationKey = generationKey;
+
+    // ローディング表示（生成中は投稿へ進めない）
     elements.loadingContainer.style.display = 'block';
     elements.reviewEditor.style.display = 'none';
     elements.regenerateBtn.style.display = 'none';
+    elements.aiErrorMessage.style.display = 'none';
+    elements.nextToStep4.disabled = true;
+    elements.nextToStep4.classList.remove('glow');
 
+    let review = null;
     try {
-        let review;
-
-        // GAS経由でAI生成を試みる（JSONP方式）
-        if (CONFIG.GAS_URL) {
-            review = await generateReviewWithGAS();
-        } else {
-            // GAS URLが設定されていない場合はテンプレートを使用
-            review = generateReviewFromTemplate();
+        if (!CONFIG.GAS_URL) {
+            throw new Error('GAS_URL is not configured');
         }
-
-        state.generatedReview = review;
-        state.editedReview = review;
-
-        // Show editor
-        elements.reviewText.value = review;
-        updateCharCount();
-
-        elements.loadingContainer.style.display = 'none';
-        elements.reviewEditor.style.display = 'block';
-        elements.regenerateBtn.style.display = 'block';
-
-        validateStep3();
-
+        review = await generateReviewWithGAS();
     } catch (error) {
         console.error('Review generation error:', error);
+    }
 
-        // Fallback to template
-        const review = generateReviewFromTemplate();
+    // 待っている間に新しい生成が始まっていたら、この結果は使わない
+    if (requestId !== state.generationSeq) return;
+    state.pendingGenerationKey = '';
+
+    if (review) {
         state.generatedReview = review;
         state.editedReview = review;
-
-        elements.reviewText.value = review;
-        updateCharCount();
-
-        elements.loadingContainer.style.display = 'none';
-        elements.reviewEditor.style.display = 'block';
-        elements.regenerateBtn.style.display = 'block';
-
-        validateStep3();
+        state.lastGenerationKey = generationKey;
+        elements.regenerateLabel.textContent = '別の口コミ例を見る';
+    } else {
+        // 失敗時は定型文に差し替えず、再試行か手入力を案内する（入力済みの文章は残す）
+        elements.aiErrorMessage.style.display = 'block';
+        elements.regenerateLabel.textContent = 'もう一度作成する';
     }
+
+    elements.reviewText.value = state.editedReview;
+    updateCharCount();
+
+    elements.loadingContainer.style.display = 'none';
+    elements.reviewEditor.style.display = 'block';
+    elements.regenerateBtn.style.display = 'block';
+
+    validateStep3();
 }
 
 /**
@@ -979,11 +978,11 @@ async function generateReview() {
  */
 function generateReviewWithGAS() {
     return new Promise((resolve, reject) => {
-        // タイムアウト設定（30秒）
+        // タイムアウト設定（90秒）※AIが文章を考える時間を見込む
         const timeout = setTimeout(() => {
             cleanup();
             reject(new Error('Request timeout'));
-        }, 30000);
+        }, 90000);
 
         // コールバック関数名を生成
         const callbackName = 'gasCallback_' + Date.now();
@@ -991,10 +990,11 @@ function generateReviewWithGAS() {
         // クリーンアップ関数
         const cleanup = () => {
             clearTimeout(timeout);
-            delete window[callbackName];
+            // タイムアウト後に応答が届いてもエラーにならないよう、空の関数に差し替える
+            window[callbackName] = () => {};
             const script = document.getElementById(callbackName);
             if (script) {
-                document.body.removeChild(script);
+                script.remove();
             }
         };
 
@@ -1006,10 +1006,10 @@ function generateReviewWithGAS() {
                 console.log('Debug info:', data.debug);
             }
             if (data && data.status === 'success' && data.review) {
-                console.log('Review source:', data.source);
+                console.log('Review source:', data.source, data.model || '');
                 resolve(data.review);
             } else {
-                reject(new Error('Invalid response from GAS'));
+                reject(new Error((data && data.message) || 'Invalid response from GAS'));
             }
         };
 
@@ -1041,24 +1041,12 @@ function generateReviewWithGAS() {
     });
 }
 
-/**
- * テンプレートから口コミを生成（フォールバック）
- */
-function generateReviewFromTemplate() {
-    const rating = state.ratings.overall;
-    const templates = reviewTemplates[rating] || reviewTemplates[3];
-    const template = templates[Math.floor(Math.random() * templates.length)];
-
-    return template.replace('{menu}', state.selectedMenu);
-}
-
 // =====================================================
 // Preview
 // =====================================================
 
 function updatePreview() {
     elements.previewContent.textContent = state.editedReview;
-    elements.previewStars.textContent = '★'.repeat(state.ratings.overall) + '☆'.repeat(5 - state.ratings.overall);
 }
 
 // =====================================================
