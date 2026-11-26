@@ -11,8 +11,8 @@ const CONFIG = window.CONFIG || {
     GAS_URL: '',
     GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
     SALON_NAME: 'KATEstageLASH 蒲田西口店',
-    MAX_CHARS: 500,
-    MIN_CHARS: 50
+    MAX_CHARS: 10000,  // 実質無制限（config.jsと同じ）
+    MIN_CHARS: 30
 };
 
 // =====================================================
