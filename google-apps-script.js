@@ -303,14 +303,20 @@ function generateReviewWithAI(data) {
     muteHttpExceptions: true
   };
 
+  // 再試行は「1回目がすぐに失敗したとき」だけにする。
+  // 時間切れ（約60秒）のあとに再試行すると、画面側の待ち時間（90秒）に間に合わず、料金だけかかるため
   const maxAttempts = 2;
+  const retryWithinMs = 20000;
+  const startedAt = Date.now();
+  const canRetry = attempt => attempt < maxAttempts && Date.now() - startedAt < retryWithinMs;
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     let response;
     try {
       response = UrlFetchApp.fetch(CLAUDE_API_URL, options);
     } catch (error) {
       Logger.log('Claude API 通信エラー（' + attempt + '回目）: ' + error);
-      if (attempt < maxAttempts) {
+      if (canRetry(attempt)) {
         Utilities.sleep(2000);
         continue;
       }
@@ -332,7 +338,7 @@ function generateReviewWithAI(data) {
     Logger.log('Claude API エラー（' + attempt + '回目） HTTP ' + code + ': ' + body.substring(0, 1000));
 
     // 混雑や一時的な障害（429 / 5xx）のときだけ、1回だけ再試行する
-    if ((code === 429 || code >= 500) && attempt < maxAttempts) {
+    if ((code === 429 || code >= 500) && canRetry(attempt)) {
       Utilities.sleep(3000);
       continue;
     }

@@ -954,22 +954,25 @@ async function generateReview() {
 
     if (review) {
         state.generatedReview = review;
-        state.editedReview = review;
         state.lastGenerationKey = generationKey;
+        elements.reviewText.value = review;
         elements.regenerateLabel.textContent = '別の口コミ例を見る';
     } else {
         // 失敗時は定型文に差し替えず、再試行か手入力を案内する（入力済みの文章は残す）
         elements.aiErrorMessage.style.display = 'block';
         elements.regenerateLabel.textContent = 'もう一度作成する';
     }
-
-    elements.reviewText.value = state.editedReview;
     updateCharCount();
 
     elements.loadingContainer.style.display = 'none';
     elements.reviewEditor.style.display = 'block';
     elements.regenerateBtn.style.display = 'block';
 
+    // 待っている間に星2以下（自由記述）へ切り替わっていたら、お客様が書いている文章は上書きしない
+    // （生成結果は残しておき、同じ内容で星3以上に戻したときに使う）
+    if (state.isLowRating) return;
+
+    state.editedReview = elements.reviewText.value;
     validateStep3();
 }
 
