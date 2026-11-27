@@ -90,6 +90,13 @@ const RATING_LABELS = {
   value: '価格・コスパ'
 };
 
+// 人が口コミでは使わない、不自然な語尾（「〜なんです」「〜良かったんです」「〜ですよね」など）
+// 「〜さんです」「もちろんです」のような普通の言い方は対象にしない
+const UNNATURAL_ENDINGS = /[なただるうくすいかぐぶむぬつ]んです|ですよね/;
+
+// 不自然な語尾が入っていて作り直すときに、お客様の回答のあとに付け足す注意書き
+const ENDING_REMINDER = '特に、「〜んです」「〜なんです」「〜ですよね」のような語尾は使わないでください（例：「良かったんです」ではなく「良かったです」）。';
+
 // すべての生成で共通の指示（システムプロンプト）
 const REVIEW_SYSTEM_PROMPT = `あなたは、まつ毛・眉毛サロンを利用したお客様が、GoogleマップやHot Pepper Beautyに投稿する口コミの下書きを書くお手伝いをしています。
 お客様はアンケートに答えています（施術メニュー、総合満足度、良かった点の選択、各項目の評価）。その回答だけをもとに、お客様本人の視点（一人称）で口コミの下書きを書いてください。お客様は下書きを読み、必要に応じて手直ししてから投稿します。
@@ -290,6 +297,7 @@ function parseGenerateParams(params) {
 /**
  * Claude API（Sonnet 5.5）で口コミの下書きを生成
  * 失敗した場合は定型文で代用せず、エラーを返す（画面側で再試行・手入力を案内）
+ * 不自然な語尾（「〜なんです」など）が入っていたら、時間に余裕があるときだけ1回作り直す
  * @param {Object} data - parseGenerateParams() で整えた入力内容
  * @returns {Object} - { status: 'success', review } または { status: 'error', message }
  */
@@ -300,6 +308,33 @@ function generateReviewWithAI(data) {
     return { status: 'error', message: 'APIキーが設定されていません' };
   }
 
+  const startedAt = Date.now();
+  const userMessage = createReviewUserMessage(data);
+  const first = requestReview(apiKey, userMessage, 2);
+  if (first.status !== 'success') return first;
+
+  const found = first.review.match(UNNATURAL_ENDINGS);
+  if (!found) return first;
+
+  // 作り直しは、1回目が早く終わったときだけ（画面の待ち時間 90秒に間に合わせるため）
+  if (Date.now() - startedAt > 10000) {
+    Logger.log('不自然な語尾「' + found[0] + '」がありましたが、時間がかかっているため作り直しません');
+    return first;
+  }
+  Logger.log('不自然な語尾「' + found[0] + '」があったため、1回だけ作り直します: ' + first.review);
+  const retry = requestReview(apiKey, userMessage + '\n\n' + ENDING_REMINDER, 1);
+  // 作り直しに失敗したときは、1回目の文章を使う
+  return retry.status === 'success' ? retry : first;
+}
+
+/**
+ * Claude API を呼び出して、口コミの下書きを1つ受け取る
+ * @param {string} apiKey - スクリプトプロパティのAPIキー
+ * @param {string} userMessage - お客様の回答（createReviewUserMessage の結果）
+ * @param {number} maxAttempts - 混雑・通信エラーのときの再試行を含めた、最大の呼び出し回数
+ * @returns {Object} - { status: 'success', review } または { status: 'error', message }
+ */
+function requestReview(apiKey, userMessage, maxAttempts) {
   const payload = {
     model: CLAUDE_MODEL,
     max_tokens: 16000,
@@ -309,7 +344,7 @@ function generateReviewWithAI(data) {
     fallbacks: 'default',
     system: REVIEW_SYSTEM_PROMPT,
     messages: [
-      { role: 'user', content: createReviewUserMessage(data) }
+      { role: 'user', content: userMessage }
     ]
   };
 
@@ -327,7 +362,6 @@ function generateReviewWithAI(data) {
 
   // 再試行は「1回目がすぐに失敗したとき」だけにする。
   // 時間切れ（約60秒）のあとに再試行すると、画面側の待ち時間（90秒）に間に合わず、料金だけかかるため
-  const maxAttempts = 2;
   const retryWithinMs = 20000;
   const startedAt = Date.now();
   const canRetry = attempt => attempt < maxAttempts && Date.now() - startedAt < retryWithinMs;
