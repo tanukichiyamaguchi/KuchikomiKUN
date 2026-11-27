@@ -11,8 +11,8 @@ const CONFIG = window.CONFIG || {
     GAS_URL: '',
     GOOGLE_REVIEW_URL: 'https://g.page/r/CawIWPvYFL2vEBM/review',
     SALON_NAME: 'KATEstageLASH 蒲田西口店',
-    MAX_CHARS: 500,
-    MIN_CHARS: 50
+    MAX_CHARS: 10000,  // 実質無制限（config.jsと同じ）
+    MIN_CHARS: 30
 };
 
 // =====================================================
@@ -38,7 +38,12 @@ const state = {
     improvement: '',          // 改善希望
     generatedReview: '',
     editedReview: '',
-    isLowRating: false        // 星2以下かどうか
+    isLowRating: false,       // 星2以下かどうか
+    reviewLength: 'medium',   // 口コミ文字量（short/medium/long）
+    writingStyle: 'polite',   // 口コミ文体（polite/casual/emotional/objective/friendly/simple）
+    generationSeq: 0,         // AI生成リクエストの通し番号（古い応答を捨てるため）
+    pendingGenerationKey: '', // 生成中の入力内容
+    lastGenerationKey: ''     // 最後に生成できたときの入力内容
 };
 
 // =====================================================
@@ -85,12 +90,13 @@ const elements = {
     charCount: document.getElementById('charCount'),
     freeCharCount: document.getElementById('freeCharCount'),
     regenerateBtn: document.getElementById('regenerateBtn'),
+    regenerateLabel: document.getElementById('regenerateLabel'),
+    aiErrorMessage: document.getElementById('aiErrorMessage'),
     backToStep2: document.getElementById('backToStep2'),
     nextToStep4: document.getElementById('nextToStep4'),
 
     // Step 4 elements
     previewContent: document.getElementById('previewContent'),
-    previewStars: document.getElementById('previewStars'),
     copyReviewBtn: document.getElementById('copyReviewBtn'),
     googleReviewBtn: document.getElementById('googleReviewBtn'),
     backToStep3: document.getElementById('backToStep3'),
@@ -111,36 +117,6 @@ const ratingTexts = {
 };
 
 // =====================================================
-// Review Templates (Fallback when API is not available)
-// =====================================================
-
-const reviewTemplates = {
-    5: [
-        '初めて{menu}を体験しましたが、スタッフさんの丁寧なカウンセリングのおかげで、理想通りの仕上がりになりました。施術中もリラックスできる雰囲気で、あっという間に終わりました。仕上がりも持ちも最高で、友達にもおすすめしたいサロンです。',
-        '{menu}でお世話になりました。カウンセリングがとても丁寧で、私の希望をしっかり聞いてくださいました。技術力が高く、自然で美しい仕上がりに大満足です。店内も清潔感があり、また絶対リピートします。',
-        '今まで色々なサロンを試しましたが、ここが一番良かったです。{menu}の仕上がりが素晴らしく、毎朝のメイク時間が短縮されました。スタッフさんも親切で、価格以上の価値があると思います。'
-    ],
-    4: [
-        '{menu}を受けました。スタッフさんの対応も良く、仕上がりも綺麗で満足しています。駅からも近くて通いやすいので、また利用したいと思います。',
-        '丁寧なカウンセリングで安心してお任せできました。{menu}の仕上がりも良く、友人にも褒められました。次回も同じスタッフさんにお願いしたいです。',
-        '初めての来店でしたが、スタッフさんが親切に説明してくださり、リラックスして施術を受けられました。{menu}の仕上がりも満足です。'
-    ],
-    3: [
-        '{menu}を体験しました。スタッフさんの対応は丁寧で、仕上がりも悪くないと思います。また機会があれば利用したいです。',
-        '予約通りの時間で施術していただきました。{menu}の仕上がりは期待通りでした。普通に良いサロンだと思います。',
-        '{menu}で伺いました。カウンセリングもしっかりしていて、施術も丁寧でした。特に不満はありませんでした。'
-    ],
-    2: [
-        '{menu}を受けました。もう少しカウンセリングに時間をかけていただけると、より希望に近い仕上がりになったかもしれません。',
-        '施術自体は問題なかったのですが、思っていた仕上がりと少し違いました。次回はもっと詳しく希望を伝えてみようと思います。'
-    ],
-    1: [
-        '今回の{menu}は期待していた仕上がりではありませんでした。もう少しカウンセリングで希望を聞いていただきたかったです。',
-        '残念ながら今回は満足できる仕上がりではありませんでした。改善を期待しています。'
-    ]
-};
-
-// =====================================================
 // Initialize
 // =====================================================
 
@@ -148,6 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeStarRatings();
     initializeEventListeners();
     initializeSelectionButtons();
+    initializeReviewLengthButtons();
+    initializeWritingStyleButtons();
     initializeReviewLinks();
     updateProgress();
     // Initialize active states on load
@@ -252,6 +230,11 @@ function setHeroRating(value, container) {
     }
 
     validateStep1();
+
+    // Auto-scroll to next input
+    setTimeout(() => {
+        scrollToNextInput();
+    }, 200);
 }
 
 /**
@@ -339,6 +322,48 @@ function setListItemRating(category, value, container) {
     container.classList.add('rated');
 
     validateStep1();
+
+    // Auto-scroll to next input
+    setTimeout(() => {
+        scrollToNextInput();
+    }, 200);
+}
+
+/**
+ * Scroll to the next input that needs to be filled
+ */
+function scrollToNextInput() {
+    // Check rating order
+    const ratingOrder = ['quality', 'service', 'atmosphere', 'value'];
+
+    // If overall is not set, don't scroll (user is still on hero)
+    if (state.ratings.overall === 0) return;
+
+    // Find next unrated category
+    for (const category of ratingOrder) {
+        if (state.ratings[category] === 0) {
+            const nextItem = document.querySelector(`.rating-list-item[data-category="${category}"]`);
+            if (nextItem) {
+                scrollToElement(nextItem, 120);
+            }
+            return;
+        }
+    }
+
+    // All ratings set, scroll to menu if not selected
+    if (state.selectedMenu === '') {
+        const menuSection = document.querySelector('.menu-selection');
+        if (menuSection) {
+            scrollToElement(menuSection, 100);
+        }
+        return;
+    }
+
+    // Everything filled, scroll to next button
+    const nextBtn = document.getElementById('nextToStep2');
+    if (nextBtn) {
+        scrollToElement(nextBtn, 150);
+    }
 }
 
 /**
@@ -479,6 +504,44 @@ function toggleSelection(btn, stateKey) {
     validateStep2();
 }
 
+/**
+ * Initialize review length buttons
+ */
+function initializeReviewLengthButtons() {
+    const reviewLengthButtons = document.getElementById('reviewLengthButtons');
+    if (!reviewLengthButtons) return;
+
+    reviewLengthButtons.querySelectorAll('.length-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 単一選択: 他のボタンを解除
+            reviewLengthButtons.querySelectorAll('.length-btn').forEach(b => {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+            state.reviewLength = btn.dataset.value;
+        });
+    });
+}
+
+/**
+ * Initialize writing style buttons
+ */
+function initializeWritingStyleButtons() {
+    const writingStyleButtons = document.getElementById('writingStyleButtons');
+    if (!writingStyleButtons) return;
+
+    writingStyleButtons.querySelectorAll('.style-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 単一選択: 他のボタンを解除
+            writingStyleButtons.querySelectorAll('.style-btn').forEach(b => {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+            state.writingStyle = btn.dataset.value;
+        });
+    });
+}
+
 // =====================================================
 // Event Listeners
 // =====================================================
@@ -563,6 +626,44 @@ function initializeEventListeners() {
 // Step Navigation
 // =====================================================
 
+/**
+ * Smooth scroll to element with offset
+ */
+function scrollToElement(element, offset = 20) {
+    if (!element) return;
+
+    const elementRect = element.getBoundingClientRect();
+    const absoluteElementTop = elementRect.top + window.pageYOffset;
+    const targetPosition = absoluteElementTop - offset;
+
+    window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+    });
+}
+
+/**
+ * Auto-scroll to next action area based on step
+ */
+function autoScrollForStep(step) {
+    setTimeout(() => {
+        if (step === 4) {
+            // Step 4: Scroll to copy button area
+            const copyBtn = document.getElementById('copyBtnContainer');
+            if (copyBtn) {
+                scrollToElement(copyBtn, 100);
+            }
+        } else {
+            // Other steps: Scroll to section title
+            const activeSection = document.querySelector('.step-section.active');
+            if (activeSection) {
+                const title = activeSection.querySelector('.section-title');
+                scrollToElement(title || activeSection, 80);
+            }
+        }
+    }, 100);
+}
+
 function goToStep(step) {
     state.currentStep = step;
 
@@ -585,10 +686,14 @@ function goToStep(step) {
         setupStep3();
     } else if (step === 4) {
         updatePreview();
+        // Add glow to copy button when entering step 4
+        if (elements.copyReviewBtn) {
+            elements.copyReviewBtn.classList.add('glow');
+        }
     }
 
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Auto-scroll to relevant content
+    autoScrollForStep(step);
 }
 
 function setupStep2() {
@@ -623,6 +728,19 @@ function setupStep3() {
         // 星3以上: AI生成
         elements.aiReviewSection.style.display = 'block';
         elements.freeReviewSection.style.display = 'none';
+
+        const generationKey = getGenerationKey();
+        if (state.pendingGenerationKey === generationKey) {
+            // 同じ内容で生成中なので、そのまま完了を待つ
+            return;
+        }
+        if (state.generatedReview && state.lastGenerationKey === generationKey) {
+            // 入力内容が前回と同じなら再生成しない（「戻る」で編集内容が消えないように）
+            state.editedReview = elements.reviewText.value;
+            updateCharCount();
+            validateStep3();
+            return;
+        }
         generateReview();
     }
 }
@@ -661,6 +779,13 @@ function validateStep1() {
 
     const isValid = allRatingsSet && state.selectedMenu !== '';
     elements.nextToStep2.disabled = !isValid;
+
+    // Add/remove glow effect based on validity
+    if (isValid) {
+        elements.nextToStep2.classList.add('glow');
+    } else {
+        elements.nextToStep2.classList.remove('glow');
+    }
 
     // Update active states to show next input
     updateActiveInputStates();
@@ -733,12 +858,26 @@ function validateStep2() {
     }
 
     elements.nextToStep3.disabled = !isValid;
+
+    // Add/remove glow effect based on validity
+    if (isValid) {
+        elements.nextToStep3.classList.add('glow');
+    } else {
+        elements.nextToStep3.classList.remove('glow');
+    }
 }
 
 function validateStep3() {
     const text = state.editedReview.trim();
     const isValid = text.length >= CONFIG.MIN_CHARS && text.length <= CONFIG.MAX_CHARS;
     elements.nextToStep4.disabled = !isValid;
+
+    // Add/remove glow effect based on validity
+    if (isValid) {
+        elements.nextToStep4.classList.add('glow');
+    } else {
+        elements.nextToStep4.classList.remove('glow');
+    }
 }
 
 function updateCharCount() {
@@ -773,53 +912,68 @@ function updateFreeCharCount() {
 // Review Generation (GAS経由でAI生成 - JSONP方式)
 // =====================================================
 
+/**
+ * 生成に使う入力内容をまとめたキー（同じ内容なら再生成しないために使う）
+ */
+function getGenerationKey() {
+    return JSON.stringify([
+        state.selectedMenu,
+        state.ratings,
+        state.goodPoints,
+        state.reviewLength,
+        state.writingStyle
+    ]);
+}
+
 async function generateReview() {
-    // Show loading
+    const requestId = ++state.generationSeq;
+    const generationKey = getGenerationKey();
+    state.pendingGenerationKey = generationKey;
+
+    // ローディング表示（生成中は投稿へ進めない）
     elements.loadingContainer.style.display = 'block';
     elements.reviewEditor.style.display = 'none';
     elements.regenerateBtn.style.display = 'none';
+    elements.aiErrorMessage.style.display = 'none';
+    elements.nextToStep4.disabled = true;
+    elements.nextToStep4.classList.remove('glow');
 
+    let review = null;
     try {
-        let review;
-
-        // GAS経由でAI生成を試みる（JSONP方式）
-        if (CONFIG.GAS_URL) {
-            review = await generateReviewWithGAS();
-        } else {
-            // GAS URLが設定されていない場合はテンプレートを使用
-            review = generateReviewFromTemplate();
+        if (!CONFIG.GAS_URL) {
+            throw new Error('GAS_URL is not configured');
         }
-
-        state.generatedReview = review;
-        state.editedReview = review;
-
-        // Show editor
-        elements.reviewText.value = review;
-        updateCharCount();
-
-        elements.loadingContainer.style.display = 'none';
-        elements.reviewEditor.style.display = 'block';
-        elements.regenerateBtn.style.display = 'block';
-
-        validateStep3();
-
+        review = await generateReviewWithGAS();
     } catch (error) {
         console.error('Review generation error:', error);
-
-        // Fallback to template
-        const review = generateReviewFromTemplate();
-        state.generatedReview = review;
-        state.editedReview = review;
-
-        elements.reviewText.value = review;
-        updateCharCount();
-
-        elements.loadingContainer.style.display = 'none';
-        elements.reviewEditor.style.display = 'block';
-        elements.regenerateBtn.style.display = 'block';
-
-        validateStep3();
     }
+
+    // 待っている間に新しい生成が始まっていたら、この結果は使わない
+    if (requestId !== state.generationSeq) return;
+    state.pendingGenerationKey = '';
+
+    if (review) {
+        state.generatedReview = review;
+        state.lastGenerationKey = generationKey;
+        elements.reviewText.value = review;
+        elements.regenerateLabel.textContent = '別の口コミ例を見る';
+    } else {
+        // 失敗時は定型文に差し替えず、再試行か手入力を案内する（入力済みの文章は残す）
+        elements.aiErrorMessage.style.display = 'block';
+        elements.regenerateLabel.textContent = 'もう一度作成する';
+    }
+    updateCharCount();
+
+    elements.loadingContainer.style.display = 'none';
+    elements.reviewEditor.style.display = 'block';
+    elements.regenerateBtn.style.display = 'block';
+
+    // 待っている間に星2以下（自由記述）へ切り替わっていたら、お客様が書いている文章は上書きしない
+    // （生成結果は残しておき、同じ内容で星3以上に戻したときに使う）
+    if (state.isLowRating) return;
+
+    state.editedReview = elements.reviewText.value;
+    validateStep3();
 }
 
 /**
@@ -827,11 +981,11 @@ async function generateReview() {
  */
 function generateReviewWithGAS() {
     return new Promise((resolve, reject) => {
-        // タイムアウト設定（30秒）
+        // タイムアウト設定（90秒）※AIが文章を考える時間を見込む
         const timeout = setTimeout(() => {
             cleanup();
             reject(new Error('Request timeout'));
-        }, 30000);
+        }, 90000);
 
         // コールバック関数名を生成
         const callbackName = 'gasCallback_' + Date.now();
@@ -839,10 +993,11 @@ function generateReviewWithGAS() {
         // クリーンアップ関数
         const cleanup = () => {
             clearTimeout(timeout);
-            delete window[callbackName];
+            // タイムアウト後に応答が届いてもエラーにならないよう、空の関数に差し替える
+            window[callbackName] = () => {};
             const script = document.getElementById(callbackName);
             if (script) {
-                document.body.removeChild(script);
+                script.remove();
             }
         };
 
@@ -854,14 +1009,14 @@ function generateReviewWithGAS() {
                 console.log('Debug info:', data.debug);
             }
             if (data && data.status === 'success' && data.review) {
-                console.log('Review source:', data.source);
+                console.log('Review source:', data.source, data.model || '');
                 resolve(data.review);
             } else {
-                reject(new Error('Invalid response from GAS'));
+                reject(new Error((data && data.message) || 'Invalid response from GAS'));
             }
         };
 
-        // URLパラメータを構築（良かったポイントを含める）
+        // URLパラメータを構築（良かったポイント、文字量、文体を含める）
         const params = new URLSearchParams({
             callback: callbackName,
             action: 'generate',
@@ -871,7 +1026,9 @@ function generateReviewWithGAS() {
             service: state.ratings.service,
             atmosphere: state.ratings.atmosphere,
             value: state.ratings.value,
-            goodPoints: state.goodPoints.join(',')
+            goodPoints: state.goodPoints.join(','),
+            reviewLength: state.reviewLength,
+            writingStyle: state.writingStyle
         });
 
         // scriptタグを作成してJSONPリクエスト
@@ -887,24 +1044,12 @@ function generateReviewWithGAS() {
     });
 }
 
-/**
- * テンプレートから口コミを生成（フォールバック）
- */
-function generateReviewFromTemplate() {
-    const rating = state.ratings.overall;
-    const templates = reviewTemplates[rating] || reviewTemplates[3];
-    const template = templates[Math.floor(Math.random() * templates.length)];
-
-    return template.replace('{menu}', state.selectedMenu);
-}
-
 // =====================================================
 // Preview
 // =====================================================
 
 function updatePreview() {
     elements.previewContent.textContent = state.editedReview;
-    elements.previewStars.textContent = '★'.repeat(state.ratings.overall) + '☆'.repeat(5 - state.ratings.overall);
 }
 
 // =====================================================
@@ -915,6 +1060,7 @@ async function copyReviewToClipboard() {
     try {
         await navigator.clipboard.writeText(state.editedReview);
         showToast('口コミをコピーしました');
+        updateBadgesAfterCopy();
     } catch (error) {
         // Fallback for older browsers
         const textArea = document.createElement('textarea');
@@ -927,12 +1073,47 @@ async function copyReviewToClipboard() {
         try {
             document.execCommand('copy');
             showToast('口コミをコピーしました');
+            updateBadgesAfterCopy();
         } catch (err) {
             showToast('コピーに失敗しました');
         }
 
         document.body.removeChild(textArea);
     }
+}
+
+/**
+ * Update badges after copy button is clicked
+ */
+function updateBadgesAfterCopy() {
+    // Mark copy badge as completed
+    const copyBadge = document.getElementById('copyBadge');
+    if (copyBadge) {
+        copyBadge.textContent = 'コピー完了！';
+        copyBadge.classList.add('completed');
+    }
+
+    // Remove glow from copy button
+    elements.copyReviewBtn.classList.remove('glow');
+
+    // Show Google badge and add glow to Google button
+    const googleBadge = document.getElementById('googleBadge');
+    if (googleBadge) {
+        googleBadge.classList.remove('hidden');
+    }
+
+    // Add glow to Google button
+    if (elements.googleReviewBtn) {
+        elements.googleReviewBtn.classList.add('glow');
+    }
+
+    // Auto-scroll to Google section (primary)
+    setTimeout(() => {
+        const googleSection = document.querySelector('.review-platform-section.primary');
+        if (googleSection) {
+            scrollToElement(googleSection, 80);
+        }
+    }, 300);
 }
 
 // =====================================================
